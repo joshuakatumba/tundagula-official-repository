@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — Emmanuel Ssekandi · Farm Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0F1A14;
+    --deep: #162010;
+    --panel: #1C2B1F;
+    --fresh: #2ECC71;
+    --fresh-dim: #27AE60;
+    --gold: #F0C040;
+    --text: #0F1A14;
+    --text-soft: #607060;
+    --text-muted: #9AAA9A;
+    --border: #E2EDE4;
+    --card: #F7FAF8;
+    --white: #FFFFFF;
+    --red: #E74C3C;
+    --sidebar-w: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: #F2F7F3;
+    color: var(--text);
+    display: flex;
+  }
+
+  /* SIDEBAR (same pattern) */
+  .sidebar { width: var(--sidebar-w); background: var(--night); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; }
+  .sidebar-logo { padding: 26px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--white); }
+  .logo span { color: var(--fresh); }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; }
+  .sidebar-user { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #2ECC71, #1A8A4A); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+  .sidebar-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.22); padding: 12px 10px 5px; margin-top: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.2s; }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: rgba(46,204,113,0.14); color: var(--fresh); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-chip { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+  .sidebar-bottom { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.07); }
+  .plan-badge { background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--gold); }
+  .plan-badge strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar { background: var(--white); height: 62px; padding: 0 32px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
+  .back-btn { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-soft); cursor: pointer; padding: 6px 10px; border-radius: 7px; transition: all 0.2s; border: 1px solid transparent; }
+  .back-btn:hover { background: var(--card); border-color: var(--border); color: var(--text); }
+  .topbar-sep { color: var(--text-muted); font-size: 12px; }
+  .topbar-crumb { font-size: 14px; color: var(--text); font-weight: 500; }
+  .topbar-spacer { flex: 1; }
+  .cart-btn { display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: var(--night); color: #fff; border: none; border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .cart-btn:hover { background: var(--panel); }
+  .cart-count { background: var(--fresh); color: var(--night); font-size: 11px; font-weight: 800; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+  /* PROFILE HERO */
+  .profile-hero {
+    background: var(--night);
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cpath fill='%232ECC71' fill-opacity='0.04' d='M0 0h40v40H0zm40 40h40v40H40z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .profile-hero::after {
+    content: '';
+    position: absolute; right: -80px; top: -80px;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(46,204,113,0.1), transparent 70%);
+  }
+
+  .hero-inner { display: flex; gap: 28px; align-items: flex-start; position: relative; z-index: 2; }
+
+  .hero-avatar {
+    width: 90px; height: 90px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #2ECC71, #1A6B38);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #fff;
+    flex-shrink: 0;
+    position: relative;
+    border: 3px solid rgba(46,204,113,0.4);
+  }
+
+  .verified-badge {
+    position: absolute; bottom: -6px; right: -6px;
+    background: var(--fresh); color: var(--night);
+    font-size: 10px; font-weight: 800;
+    padding: 3px 7px; border-radius: 6px;
+    border: 2px solid var(--night);
+    white-space: nowrap;
+  }
+
+  .hero-info { flex: 1; }
+  .hero-name { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+  .hero-farm { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .hero-tag { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  .hero-tag.loc { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+  .hero-tag.cat { background: rgba(46,204,113,0.15); color: var(--fresh); border: 1px solid rgba(46,204,113,0.2); }
+  .hero-tag.yrs { background: rgba(240,192,64,0.1); color: var(--gold); border: 1px solid rgba(240,192,64,0.2); }
+
+  .hero-rating { display: flex; align-items: center; gap: 10px; }
+  .stars-lg { color: var(--gold); font-size: 18px; letter-spacing: 2px; }
+  .rating-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #fff; }
+  .rating-meta { font-size: 13px; color: rgba(255,255,255,0.45); }
+
+  .hero-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; justify-content: center; }
+
+  .btn-order {
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    padding: 12px 28px; background: var(--fresh); color: var(--night);
+    border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-order:hover { background: var(--fresh-dim); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(46,204,113,0.3); }
+
+  .btn-save-farm {
+    font-family: 'Instrument Sans', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 10px 20px; background: transparent; color: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(255,255,255,0.15); border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-save-farm:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* STATS STRIP */
+  .stats-strip {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+  }
+
+  .strip-stat {
+    flex: 1;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .strip-stat:last-child { border-right: none; }
+  .ss-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--night); }
+  .ss-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+  /* PAGE BODY */
+  .page-body { display: flex; gap: 24px; padding: 28px 32px 60px; align-items: flex-start; }
+
+  .main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+  .side-col { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 86px; }
+
+  /* BOXES */
+  .box { background: var(--white); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; animation: riseIn 0.35s ease both; }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .box:nth-child(2) { animation-delay: 0.07s; }
+  .box:nth-child(3) { animation-delay: 0.14s; }
+
+  .box-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .box-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--night); }
+  .box-link { font-size: 13px; color: var(--fresh-dim); cursor: pointer; font-weight: 500; }
+  .box-body { padding: 20px 22px; }
+
+  /* BIO */
+  .bio-text { font-size: 14px; line-height: 1.75; color: var(--text-soft); }
+  .bio-text strong { color: var(--text); }
+
+  /* PRODUCE LISTINGS */
+  .produce-list { display: flex; flex-direction: column; gap: 0; }
+
+  .produce-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  .produce-row:last-child { border-bottom: none; }
+  .produce-row:hover { background: #F7FAF8; }
+
+  .produce-emoji { font-size: 32px; width: 48px; text-align: center; flex-shrink: 0; }
+
+  .produce-info { flex: 1; }
+  .produce-name { font-size: 15px; font-weight: 600; color: var(--night); margin-bottom: 3px; }
+  .produce-desc { font-size: 13px; color: var(--text-muted); }
+
+  .produce-right { text-align: right; }
+  .produce-price { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--night); }
+  .produce-unit { font-size: 12px; color: var(--text-muted); }
+  .produce-stock { font-size: 12px; margin-top: 4px; }
+  .stock-ok { color: var(--fresh-dim); font-weight: 500; }
+  .stock-low { color: #E67E22; font-weight: 500; }
+
+  .add-to-cart-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 12px; font-weight: 600;
+    padding: 7px 14px;
+    background: var(--night); color: #fff;
+    border: none; border-radius: 7px; cursor: pointer;
+    transition: all 0.2s; margin-left: 12px; white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .add-to-cart-btn:hover { background: var(--panel); transform: scale(1.04); }
+  .add-to-cart-btn.added { background: var(--fresh); color: var(--night); }
+
+  /* REVIEWS */
+  .review-list { display: flex; flex-direction: column; gap: 18px; }
+
+  .review-item { padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .review-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .reviewer-avatar { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #2ECC71, #0A6A30); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .reviewer-name { font-size: 14px; font-weight: 600; color: var(--night); }
+  .reviewer-date { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+  .review-stars { color: var(--gold); font-size: 13px; }
+  .review-text { font-size: 14px; color: var(--text-soft); line-height: 1.65; }
+
+  /* HARVEST CALENDAR */
+  .harvest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .harvest-card { background: #F7FAF8; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .hc-emoji { font-size: 24px; margin-bottom: 8px; }
+  .hc-name { font-size: 14px; font-weight: 600; color: var(--night); margin-bottom: 4px; }
+  .hc-date { font-size: 12px; color: var(--fresh-dim); font-weight: 500; }
+  .hc-qty { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* SIDEBAR: ORDER FORM */
+  .order-box { background: var(--white); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+  .order-box-header { background: var(--night); padding: 16px 20px; }
+  .order-box-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+  .order-box-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+  .order-form { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  .of-field { display: flex; flex-direction: column; gap: 5px; }
+  .of-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; }
+  .of-select, .of-input { font-family: 'Instrument Sans', sans-serif; font-size: 14px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: #F7FAF8; color: var(--text); outline: none; transition: border-color 0.2s; width: 100%; -webkit-appearance: none; }
+  .of-select:focus, .of-input:focus { border-color: var(--fresh); background: #fff; }
+
+  .of-qty-row { display: flex; align-items: center; gap: 10px; }
+  .qty-btn { width: 34px; height: 34px; border-radius: 7px; border: 1.5px solid var(--border); background: #F7FAF8; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .qty-btn:hover { border-color: var(--fresh); color: var(--fresh-dim); }
+  .qty-input { flex: 1; text-align: center; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; padding: 8px; border: 1.5px solid var(--border); border-radius: 7px; outline: none; background: #F7FAF8; color: var(--night); }
+  .qty-unit { font-size: 13px; color: var(--text-muted); }
+
+  .price-preview { background: #F0F7F2; border-radius: 8px; padding: 12px 14px; }
+  .pp-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-soft); margin-bottom: 6px; }
+  .pp-row:last-child { margin-bottom: 0; font-weight: 700; color: var(--night); font-size: 15px; border-top: 1px solid #D8EDD8; padding-top: 8px; margin-top: 4px; }
+
+  .escrow-note { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text-muted); background: rgba(46,204,113,0.06); border-radius: 8px; padding: 10px 12px; border: 1px solid rgba(46,204,113,0.15); }
+  .escrow-icon { flex-shrink: 0; font-size: 14px; }
+
+  .btn-place-order { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; padding: 13px; background: var(--fresh); color: var(--night); border: none; border-radius: 10px; cursor: pointer; width: 100%; transition: all 0.2s; }
+  .btn-place-order:hover { background: var(--fresh-dim); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(46,204,113,0.25); }
+
+  /* LOCATION BOX */
+  .map-area { background: linear-gradient(135deg, #C8E8D8, #A0C8B0); border-radius: 10px; height: 140px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+  .map-area::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234A7C59' fill-opacity='0.08'%3E%3Cpath d='M0 0h20v20H0zm20 20h20v20H20z'/%3E%3C/g%3E%3C/svg%3E"); }
+  .map-pin-lg { font-size: 28px; position: relative; z-index: 1; }
+  .map-loc-text { font-size: 14px; font-weight: 600; color: #1A4A30; position: relative; z-index: 1; }
+  .map-loc-sub { font-size: 12px; color: #3A6A4A; position: relative; z-index: 1; }
+
+  .loc-details { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .loc-row { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--text-soft); }
+  .loc-icon { font-size: 15px; width: 20px; text-align: center; }
+
+  @media (max-width: 1100px) { .side-col { display: none; } }
+  @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-wrap { margin-left: 0; } .page-body { padding: 16px; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo">Agri<span>Connect</span></div><div class="logo-sub">Restaurant Portal</div></div>
+  <div class="sidebar-user"><div class="user-avatar">KK</div><div><div class="user-name">Kati Kati Restaurant</div><div class="user-role">Procurement Manager</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Procurement</div>
+    <a class="nav-item active"><span class="nav-icon">🛒</span> Browse Marketplace</a>
+    <a class="nav-item"><span class="nav-icon">❤️</span> Saved Farmers</a>
+    <a class="nav-item"><span class="nav-icon">📦</span> My Orders <span class="nav-chip">2</span></a>
+    <a class="nav-item"><span class="nav-icon">🔄</span> Recurring Orders</a>
+    <div class="nav-group-label">Finance</div>
+    <a class="nav-item"><span class="nav-icon">💳</span> Payments & Escrow</a>
+    <a class="nav-item"><span class="nav-icon">📊</span> Spend Analytics</a>
+    <div class="nav-group-label">Account</div>
+    <a class="nav-item"><span class="nav-icon">🍽️</span> Restaurant Profile</a>
+    <a class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="plan-badge"><strong>⭐ Premium Plan</strong>Priority matching · Unlimited orders</div></div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <div class="topbar">
+    <div class="back-btn">← Back</div>
+    <div class="topbar-sep">/</div>
+    <div class="topbar-crumb">Emmanuel Ssekandi — Ssekandi Family Farm</div>
+    <div class="topbar-spacer"></div>
+    <button class="cart-btn">🛒 Cart <span class="cart-count">3</span></button>
+  </div>
+
+  <!-- HERO -->
+  <div class="profile-hero">
+    <div class="hero-inner">
+      <div class="hero-avatar">ES<div class="verified-badge">✓ Verified</div></div>
+      <div class="hero-info">
+        <div class="hero-name">Emmanuel Ssekandi</div>
+        <div class="hero-farm">Ssekandi Family Farm · Est. 2008</div>
+        <div class="hero-tags">
+          <span class="hero-tag loc">📍 Kayunga District, Uganda</span>
+          <span class="hero-tag cat">🍍 Fruits</span>
+          <span class="hero-tag cat">🥬 Vegetables</span>
+          <span class="hero-tag yrs">⏱ 17 years farming</span>
+        </div>
+        <div class="hero-rating">
+          <span class="stars-lg">★★★★★</span>
+          <span class="rating-val">4.9</span>
+          <span class="rating-meta">from 28 verified restaurant reviews</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-order">Order from this farm →</button>
+        <button class="btn-save-farm">☆ Save farm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="strip-stat"><div class="ss-val">47</div><div class="ss-label">Total orders fulfilled</div></div>
+    <div class="strip-stat"><div class="ss-val">94%</div><div class="ss-label">On-time delivery</div></div>
+    <div class="strip-stat"><div class="ss-val">12 acres</div><div class="ss-label">Farm size</div></div>
+    <div class="strip-stat"><div class="ss-val">UGX 5K</div><div class="ss-label">Starting price / kg</div></div>
+    <div class="strip-stat"><div class="ss-val">Self-delivers</div><div class="ss-label">Delivery option</div></div>
+  </div>
+
+  <!-- BODY -->
+  <div class="page-body">
+
+    <div class="main-col">
+
+      <!-- BIO -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">About This Farm</div></div>
+        <div class="box-body">
+          <p class="bio-text">
+            My name is <strong>Emmanuel Ssekandi</strong> and I have been farming in <strong>Kayunga District</strong> since 2008, when I inherited 12 acres from my late father. What started as a small mixed plot has grown into a dedicated fruit farm — our specialty is <strong>Kayunga pineapples</strong>, which are known across Kampala for their consistent sweetness and size.<br><br>
+            We grow without chemical pesticides, relying instead on compost and crop rotation. Every fruit that leaves our farm has been hand-inspected. We deliver directly to restaurants in Kampala twice a week — Tuesdays and Fridays — so your kitchen receives produce that was harvested within 48 hours.<br><br>
+            We have supplied <strong>Kati Kati, Serena Hotel, and Café Javas</strong> consistently for over a year. I personally ensure quality on every delivery.
+          </p>
+        </div>
+      </div>
+
+      <!-- PRODUCE LISTINGS -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Available Produce</div><span class="box-link">7 listings</span></div>
+        <div class="produce-list">
+
+          <div class="produce-row">
+            <div class="produce-emoji">🍍</div>
+            <div class="produce-info">
+              <div class="produce-name">Fresh Kayunga Pineapples</div>
+              <div class="produce-desc">Harvested Tue & Fri · Min. order 20kg</div>
+            </div>
+            <div class="produce-right">
+              <div class="produce-price">UGX 5,000</div>
+              <div class="produce-unit">per kg</div>
+              <div class="produce-stock stock-ok">320kg in stock</div>
+            </div>
+            <button class="add-to-cart-btn" onclick="this.textContent='✓ Added'; this.classList.add('added')">+ Cart</button>
+          </div>
+
+          <div class="produce-row">
+            <div class="produce-emoji">🥭</div>
+            <div class="produce-info">
+              <div class="produce-name">Mango — Ngowe Variety</div>
+              <div class="produce-desc">Large, sweet · Min. order 10kg</div>
+            </div>
+            <div class="produce-right">
+              <div class="produce-price">UGX 7,000</div>
+              <div class="produce-unit">per kg</div>
+              <div class="produce-stock stock-low">18kg — low stock</div>
+            </div>
+            <button class="add-to-cart-btn" onclick="this.textContent='✓ Added'; this.classList.add('added')">+ Cart</button>
+          </div>
+
+          <div class="produce-row">
+            <div class="produce-emoji">🍋</div>
+            <div class="produce-info">
+              <div class="produce-name">Passion Fruit</div>
+              <div class="produce-desc">Purple-skinned, high pulp yield · Min. 5kg</div>
+            </div>
+            <div class="produce-right">
+              <div class="produce-price">UGX 8,000</div>
+              <div class="produce-unit">per kg</div>
+              <div class="produce-stock stock-ok">80kg in stock</div>
+            </div>
+            <button class="add-to-cart-btn" onclick="this.textContent='✓ Added'; this.classList.add('added')">+ Cart</button>
+          </div>
+
+          <div class="produce-row">
+            <div class="produce-emoji">🍉</div>
+            <div class="produce-info">
+              <div class="produce-name">Watermelon</div>
+              <div class="produce-desc">5–8kg per fruit · Min. 20kg</div>
+            </div>
+            <div class="produce-right">
+              <div class="produce-price">UGX 3,500</div>
+              <div class="produce-unit">per kg</div>
+              <div class="produce-stock stock-low">25kg — low stock</div>
+            </div>
+            <button class="add-to-cart-btn" onclick="this.textContent='✓ Added'; this.classList.add('added')">+ Cart</button>
+          </div>
+
+          <div class="produce-row">
+            <div class="produce-emoji">🥬</div>
+            <div class="produce-info">
+              <div class="produce-name">Sukuma Wiki (Kale)</div>
+              <div class="produce-desc">Freshly cut mornings · Min. 10kg</div>
+            </div>
+            <div class="produce-right">
+              <div class="produce-price">UGX 2,500</div>
+              <div class="produce-unit">per kg</div>
+              <div class="produce-stock stock-ok">60kg in stock</div>
+            </div>
+            <button class="add-to-cart-btn" onclick="this.textContent='✓ Added'; this.classList.add('added')">+ Cart</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- HARVEST CALENDAR -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Upcoming Harvests</div><span class="box-link">Plan ahead</span></div>
+        <div class="box-body">
+          <div class="harvest-grid">
+            <div class="harvest-card"><div class="hc-emoji">🍍</div><div class="hc-name">Pineapples</div><div class="hc-date">Ready: 8 April 2026</div><div class="hc-qty">Est. 200kg</div></div>
+            <div class="harvest-card"><div class="hc-emoji">🥭</div><div class="hc-name">Mangoes</div><div class="hc-date">Ready: 14 April 2026</div><div class="hc-qty">Est. 150kg</div></div>
+            <div class="harvest-card"><div class="hc-emoji">🍉</div><div class="hc-name">Watermelon</div><div class="hc-date">Ready: 3 May 2026</div><div class="hc-qty">Est. 400kg</div></div>
+            <div class="harvest-card"><div class="hc-emoji">🍋</div><div class="hc-name">Passion Fruit</div><div class="hc-date">Ready: 20 May 2026</div><div class="hc-qty">Est. 80kg</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Restaurant Reviews</div><span class="box-link">28 reviews</span></div>
+        <div class="box-body">
+          <div class="review-list">
+
+            <div class="review-item">
+              <div class="review-header">
+                <div class="reviewer-avatar">KK</div>
+                <div><div class="reviewer-name">Kati Kati Restaurant</div><div class="review-stars">★★★★★</div></div>
+                <div class="reviewer-date">March 2026</div>
+              </div>
+              <div class="review-text">Emmanuel is our most reliable supplier. The pineapples arrive exactly as described — sweet, firm, and consistently sized. He even called ahead when one batch was slightly delayed due to rain. That's the kind of farmer you want a long-term contract with.</div>
+            </div>
+
+            <div class="review-item">
+              <div class="review-header">
+                <div class="reviewer-avatar" style="background:linear-gradient(135deg,#8E44AD,#4A235A);">SH</div>
+                <div><div class="reviewer-name">Serena Hotel Kampala</div><div class="review-stars">★★★★★</div></div>
+                <div class="reviewer-date">February 2026</div>
+              </div>
+              <div class="review-text">We source 60kg of pineapples and passion fruit weekly from Ssekandi Farm. Consistent quality, good communication. The harvest calendar feature is very helpful for our menu planning team. Highly recommended.</div>
+            </div>
+
+            <div class="review-item">
+              <div class="review-header">
+                <div class="reviewer-avatar" style="background:linear-gradient(135deg,#E67E22,#7D4010);">CJ</div>
+                <div><div class="reviewer-name">Café Javas — Oasis Mall</div><div class="review-stars">★★★★☆</div></div>
+                <div class="reviewer-date">January 2026</div>
+              </div>
+              <div class="review-text">Good quality produce overall. The mangoes in January were exceptional. One order had a shorter-than-expected shelf life but Emmanuel replaced it quickly. Would order again.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE COLUMN -->
+    <div class="side-col">
+
+      <!-- ORDER FORM -->
+      <div class="order-box">
+        <div class="order-box-header">
+          <div class="order-box-title">Place an Order</div>
+          <div class="order-box-sub">Direct from Ssekandi Farm · Escrow-protected</div>
+        </div>
+        <div class="order-form">
+
+          <div class="of-field">
+            <div class="of-label">Select Produce</div>
+            <select class="of-select">
+              <option>🍍 Pineapples — UGX 5,000/kg</option>
+              <option>🥭 Mangoes — UGX 7,000/kg</option>
+              <option>🍋 Passion Fruit — UGX 8,000/kg</option>
+              <option>🍉 Watermelon — UGX 3,500/kg</option>
+              <option>🥬 Kale — UGX 2,500/kg</option>
+            </select>
+          </div>
+
+          <div class="of-field">
+            <div class="of-label">Quantity</div>
+            <div class="of-qty-row">
+              <button class="qty-btn" onclick="changeQty(-5)">−</button>
+              <input class="qty-input" id="qtyInput" type="number" value="40" min="20">
+              <span class="qty-unit">kg</span>
+              <button class="qty-btn" onclick="changeQty(5)">+</button>
+            </div>
+          </div>
+
+          <div class="of-field">
+            <div class="of-label">Delivery Date</div>
+            <input class="of-input" type="date" value="2026-04-04">
+          </div>
+
+          <div class="of-field">
+            <div class="of-label">Delivery Method</div>
+            <select class="of-select">
+              <option>🚗 Farm delivers to us</option>
+              <option>🏠 We collect from farm</option>
+            </select>
+          </div>
+
+          <div class="price-preview" id="pricePreview">
+            <div class="pp-row"><span>40kg × UGX 5,000</span><span>UGX 200,000</span></div>
+            <div class="pp-row"><span>Delivery</span><span>UGX 15,000</span></div>
+            <div class="pp-row"><span>AgriConnect fee (3%)</span><span>UGX 6,000</span></div>
+            <div class="pp-row"><span>Total</span><span>UGX 221,000</span></div>
+          </div>
+
+          <div class="escrow-note">
+            <span class="escrow-icon">🔒</span>
+            <span>Payment held in escrow via MTN MoMo. Released to farmer only after you confirm delivery.</span>
+          </div>
+
+          <button class="btn-place-order">Place Order →</button>
+
+        </div>
+      </div>
+
+      <!-- LOCATION -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Farm Location</div></div>
+        <div class="box-body">
+          <div class="map-area">
+            <div class="map-pin-lg">📍</div>
+            <div class="map-loc-text">Kayunga District</div>
+            <div class="map-loc-sub">Central Uganda</div>
+          </div>
+          <div class="loc-details">
+            <div class="loc-row"><span class="loc-icon">📍</span> Kayunga District, Kayunga Sub-county</div>
+            <div class="loc-row"><span class="loc-icon">🚗</span> ~42km from Kampala (~55 min drive)</div>
+            <div class="loc-row"><span class="loc-icon">🚚</span> Delivers: Tuesdays & Fridays</div>
+            <div class="loc-row"><span class="loc-icon">📞</span> +256 77X XXX XXX</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function changeQty(delta) {
+    const input = document.getElementById('qtyInput');
+    const val = Math.max(20, parseInt(input.value) + delta);
+    input.value = val;
+  }
+</script>
+</body>
+</html>

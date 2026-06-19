@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — Farmer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #3D2B1F;
+    --clay: #8B5E3C;
+    --harvest: #D4A843;
+    --harvest-light: #F0C960;
+    --leaf: #4A7C59;
+    --leaf-light: #6AAF7A;
+    --cream: #FBF6EE;
+    --mist: #F0E8D8;
+    --bark: #6B4226;
+    --sky: #C8DDD5;
+    --text: #2A1F14;
+    --text-soft: #7A6555;
+    --danger: #C0392B;
+    --warning: #E67E22;
+    --sidebar-w: 240px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--mist);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--soil);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    padding: 24px 22px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--harvest);
+  }
+
+  .logo-text span { color: var(--leaf-light); }
+
+  .logo-badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+    margin-top: 2px;
+  }
+
+  /* FARMER MINI PROFILE */
+  .sidebar-farmer {
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .farmer-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--leaf), var(--harvest));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .farmer-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .farmer-status {
+    font-size: 11px;
+    color: var(--leaf-light);
+    display: flex; align-items: center; gap: 4px;
+    margin-top: 2px;
+  }
+
+  .dot-green {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--leaf-light);
+  }
+
+  /* NAV */
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.25);
+    padding: 12px 10px 6px;
+    margin-top: 8px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+  .nav-link.active {
+    background: rgba(212,168,67,0.15);
+    color: var(--harvest);
+  }
+
+  .nav-icon { width: 18px; text-align: center; font-size: 15px; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .sidebar-footer {
+    padding: 16px 22px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* MAIN */
+  .main-wrap {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: #fff;
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #E8DDD0;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .topbar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    color: var(--soil);
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+  .notif-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--mist);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    position: relative;
+  }
+
+  .notif-dot {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 2px solid #fff;
+  }
+
+  .topbar-date {
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+
+  /* PAGE CONTENT */
+  .page-content {
+    padding: 28px 32px 60px;
+    flex: 1;
+  }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 22px;
+    border: 1px solid #EEE4D8;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .stat-card.green::before { background: var(--leaf); }
+  .stat-card.gold::before { background: var(--harvest); }
+  .stat-card.blue::before { background: #5B8DB8; }
+  .stat-card.orange::before { background: var(--warning); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card:nth-child(2) { animation-delay: 0.05s; }
+  .stat-card:nth-child(3) { animation-delay: 0.1s; }
+  .stat-card:nth-child(4) { animation-delay: 0.15s; }
+
+  .stat-icon { font-size: 22px; margin-bottom: 12px; }
+
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--soil);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-change {
+    font-size: 12px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .stat-change.up { color: var(--leaf); }
+  .stat-change.down { color: var(--danger); }
+
+  /* TWO COLUMN LAYOUT */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* SECTION BOXES */
+  .box {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #EEE4D8;
+    overflow: hidden;
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+
+  .box-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #F4ECE0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .box-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--soil);
+  }
+
+  .box-link {
+    font-size: 13px;
+    color: var(--leaf);
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .box-body { padding: 18px 22px; }
+
+  /* ORDERS TABLE */
+  .order-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 0;
+    border-bottom: 1px solid #F4ECE0;
+    transition: background 0.15s;
+  }
+
+  .order-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .order-avatar {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--mist);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .order-info { flex: 1; min-width: 0; }
+
+  .order-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .order-detail { font-size: 12px; color: var(--text-soft); }
+
+  .order-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--soil);
+    white-space: nowrap;
+    margin-right: 10px;
+  }
+
+  .order-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-new { background: rgba(74,124,89,0.12); color: var(--leaf); }
+  .badge-pending { background: rgba(230,126,34,0.12); color: var(--warning); }
+  .badge-delivered { background: rgba(91,141,184,0.12); color: #5B8DB8; }
+  .badge-confirmed { background: rgba(212,168,67,0.15); color: var(--bark); }
+
+  /* QUICK ACTIONS */
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .qa-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    border-radius: 10px;
+    border: 1.5px solid #EEE4D8;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+    text-decoration: none;
+  }
+
+  .qa-btn:hover {
+    border-color: var(--leaf);
+    transform: translateX(3px);
+    background: rgba(74,124,89,0.04);
+  }
+
+  .qa-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .qa-icon.green { background: rgba(74,124,89,0.12); }
+  .qa-icon.gold { background: rgba(212,168,67,0.15); }
+  .qa-icon.blue { background: rgba(91,141,184,0.12); }
+  .qa-icon.orange { background: rgba(230,126,34,0.12); }
+
+  .qa-label { font-size: 14px; font-weight: 500; color: var(--text); }
+  .qa-sub { font-size: 12px; color: var(--text-soft); }
+  .qa-arrow { margin-left: auto; color: var(--text-soft); font-size: 14px; }
+
+  /* HARVEST CALENDAR */
+  .cal-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #F4ECE0;
+  }
+
+  .cal-row:last-child { border-bottom: none; }
+
+  .cal-date {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: var(--mist);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cal-month { font-size: 9px; text-transform: uppercase; color: var(--bark); letter-spacing: 0.05em; font-weight: 600; }
+  .cal-day { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--soil); line-height: 1; }
+
+  .cal-produce { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .cal-qty { font-size: 12px; color: var(--text-soft); }
+
+  .cal-icon { font-size: 20px; margin-left: auto; }
+
+  /* PROFILE COMPLETION */
+  .profile-progress-wrap {
+    background: var(--mist);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+
+  .pp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .pp-title { font-size: 14px; font-weight: 600; color: var(--soil); }
+  .pp-pct { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--leaf); }
+
+  .pp-bar-wrap {
+    background: #E0D6C8;
+    border-radius: 100px;
+    height: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .pp-bar-fill {
+    height: 100%;
+    width: 72%;
+    background: linear-gradient(90deg, var(--leaf), var(--harvest));
+    border-radius: 100px;
+  }
+
+  .pp-tasks { display: flex; flex-direction: column; gap: 6px; }
+
+  .pp-task {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+
+  .pp-task.done { color: var(--leaf); }
+  .pp-task-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid #C8B8A8;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+
+  .pp-task.done .pp-task-dot {
+    background: var(--leaf);
+    border-color: var(--leaf);
+    color: #fff;
+  }
+
+  /* RATING STARS */
+  .stars { color: var(--harvest); font-size: 13px; letter-spacing: 1px; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: rgba(212,168,67,0.12);
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--bark);
+    animation: fadeUp 0.3s ease;
+  }
+
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-banner strong { color: var(--soil); }
+  .alert-dismiss { margin-left: auto; cursor: pointer; color: var(--text-soft); font-size: 16px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 20px 16px 40px; }
+    .topbar { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Agri<span>Connect</span></div>
+    <div class="logo-badge">Farmer Portal</div>
+  </div>
+
+  <div class="sidebar-farmer">
+    <div class="farmer-avatar">ES</div>
+    <div>
+      <div class="farmer-name">Emmanuel Ssekandi</div>
+      <div class="farmer-status"><span class="dot-green"></span> Profile Active</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a class="nav-link active">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a class="nav-link">
+      <span class="nav-icon">📦</span> My Orders
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-link">
+      <span class="nav-icon">🥬</span> My Listings
+    </a>
+    <a class="nav-link">
+      <span class="nav-icon">📅</span> Harvest Calendar
+    </a>
+
+    <div class="nav-section-label">Finance</div>
+    <a class="nav-link">
+      <span class="nav-icon">💰</span> Earnings
+    </a>
+    <a class="nav-link">
+      <span class="nav-icon">📱</span> MoMo Payments
+    </a>
+
+    <div class="nav-section-label">Profile</div>
+    <a class="nav-link">
+      <span class="nav-icon">👨‍🌾</span> My Farm Profile
+    </a>
+    <a class="nav-link">
+      <span class="nav-icon">⭐</span> My Reviews
+    </a>
+    <a class="nav-link">
+      <span class="nav-icon">⚙️</span> Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">AgriConnect v1.0 · Uganda</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title">Good morning, Emmanuel 👋</div>
+    <div class="topbar-right">
+      <div class="topbar-date">Wednesday, 1 April 2026</div>
+      <button class="notif-btn">🔔 <span class="notif-dot"></span></button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="page-content">
+
+    <!-- ALERT -->
+    <div class="alert-banner">
+      <span class="alert-icon">📋</span>
+      <div><strong>New order from Kati Kati Restaurant</strong> — 40kg pineapples requested for Friday delivery. <strong style="color:var(--leaf);cursor:pointer;">Review & Accept →</strong></div>
+      <span class="alert-dismiss">×</span>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">This Month's Earnings</div>
+        <div class="stat-value">UGX 842K</div>
+        <div class="stat-change up">↑ 18% vs last month</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">Active Orders</div>
+        <div class="stat-value">3</div>
+        <div class="stat-change up">↑ 1 new today</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon">🥬</div>
+        <div class="stat-label">Active Listings</div>
+        <div class="stat-value">7</div>
+        <div class="stat-change">across 2 categories</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-label">Average Rating</div>
+        <div class="stat-value">4.8</div>
+        <div class="stat-change up">from 12 reviews</div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div class="two-col">
+
+      <!-- ORDERS -->
+      <div class="box">
+        <div class="box-header">
+          <div class="box-title">Recent Orders</div>
+          <a class="box-link">View all</a>
+        </div>
+        <div class="box-body" style="padding-top:8px;">
+          <div class="order-row">
+            <div class="order-avatar">🍽️</div>
+            <div class="order-info">
+              <div class="order-name">Kati Kati Restaurant</div>
+              <div class="order-detail">40kg Pineapples · Delivery: Fri 4 Apr</div>
+            </div>
+            <div class="order-amount">UGX 200K</div>
+            <div class="order-badge badge-new">New</div>
+          </div>
+          <div class="order-row">
+            <div class="order-avatar">🏨</div>
+            <div class="order-info">
+              <div class="order-name">Serena Hotel Kampala</div>
+              <div class="order-detail">25kg Mangoes · Delivery: Thu 3 Apr</div>
+            </div>
+            <div class="order-amount">UGX 175K</div>
+            <div class="order-badge badge-confirmed">Confirmed</div>
+          </div>
+          <div class="order-row">
+            <div class="order-avatar">☕</div>
+            <div class="order-info">
+              <div class="order-name">Café Javas — Oasis Mall</div>
+              <div class="order-detail">20kg Passion Fruit · Pickup</div>
+            </div>
+            <div class="order-amount">UGX 160K</div>
+            <div class="order-badge badge-pending">Awaiting pickup</div>
+          </div>
+          <div class="order-row">
+            <div class="order-avatar">🍕</div>
+            <div class="order-info">
+              <div class="order-name">Mamba Point Restaurant</div>
+              <div class="order-detail">30kg Watermelon · 27 Mar</div>
+            </div>
+            <div class="order-amount">UGX 120K</div>
+            <div class="order-badge badge-delivered">Delivered ✓</div>
+          </div>
+          <div class="order-row">
+            <div class="order-avatar">🍴</div>
+            <div class="order-info">
+              <div class="order-name">The Lawns Restaurant</div>
+              <div class="order-detail">15kg Pineapples · 24 Mar</div>
+            </div>
+            <div class="order-amount">UGX 75K</div>
+            <div class="order-badge badge-delivered">Delivered ✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <!-- QUICK ACTIONS -->
+        <div class="box">
+          <div class="box-header">
+            <div class="box-title">Quick Actions</div>
+          </div>
+          <div class="box-body">
+            <div class="quick-actions">
+              <a class="qa-btn">
+                <div class="qa-icon green">➕</div>
+                <div><div class="qa-label">Add New Listing</div><div class="qa-sub">Post produce for sale</div></div>
+                <div class="qa-arrow">›</div>
+              </a>
+              <a class="qa-btn">
+                <div class="qa-icon gold">📅</div>
+                <div><div class="qa-label">Update Harvest Dates</div><div class="qa-sub">Let restaurants plan ahead</div></div>
+                <div class="qa-arrow">›</div>
+              </a>
+              <a class="qa-btn">
+                <div class="qa-icon blue">👤</div>
+                <div><div class="qa-label">Edit Farm Profile</div><div class="qa-sub">Update your storefront</div></div>
+                <div class="qa-arrow">›</div>
+              </a>
+              <a class="qa-btn">
+                <div class="qa-icon orange">💸</div>
+                <div><div class="qa-label">Withdraw Earnings</div><div class="qa-sub">Send to MTN MoMo</div></div>
+                <div class="qa-arrow">›</div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE COMPLETION -->
+        <div class="box">
+          <div class="box-header">
+            <div class="box-title">Profile Completion</div>
+          </div>
+          <div class="box-body" style="padding-top:12px;">
+            <div class="profile-progress-wrap">
+              <div class="pp-header">
+                <span class="pp-title">Your profile is 72% complete</span>
+                <span class="pp-pct">72%</span>
+              </div>
+              <div class="pp-bar-wrap"><div class="pp-bar-fill"></div></div>
+              <div class="pp-tasks">
+                <div class="pp-task done"><div class="pp-task-dot">✓</div> Farm photo added</div>
+                <div class="pp-task done"><div class="pp-task-dot">✓</div> 3 produce listings created</div>
+                <div class="pp-task done"><div class="pp-task-dot">✓</div> Location pinned on map</div>
+                <div class="pp-task"><div class="pp-task-dot"></div> Add harvest calendar dates</div>
+                <div class="pp-task"><div class="pp-task-dot"></div> Upload certification documents</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-soft);">Complete profiles get <strong style="color:var(--leaf)">3× more enquiries</strong> from restaurants.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HARVEST CALENDAR PREVIEW -->
+    <div class="box">
+      <div class="box-header">
+        <div class="box-title">Upcoming Harvests</div>
+        <a class="box-link">Manage Calendar</a>
+      </div>
+      <div class="box-body" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px,1fr));gap:0 24px;padding-top:8px;">
+        <div class="cal-row">
+          <div class="cal-date"><div class="cal-month">Apr</div><div class="cal-day">8</div></div>
+          <div>
+            <div class="cal-produce">🍍 Pineapples</div>
+            <div class="cal-qty">Est. 200kg available</div>
+          </div>
+          <div class="cal-icon">✏️</div>
+        </div>
+        <div class="cal-row">
+          <div class="cal-date"><div class="cal-month">Apr</div><div class="cal-day">14</div></div>
+          <div>
+            <div class="cal-produce">🥭 Mangoes</div>
+            <div class="cal-qty">Est. 150kg available</div>
+          </div>
+          <div class="cal-icon">✏️</div>
+        </div>
+        <div class="cal-row">
+          <div class="cal-date"><div class="cal-month">May</div><div class="cal-day">3</div></div>
+          <div>
+            <div class="cal-produce">🍉 Watermelon</div>
+            <div class="cal-qty">Est. 400kg available</div>
+          </div>
+          <div class="cal-icon">✏️</div>
+        </div>
+        <div class="cal-row">
+          <div class="cal-date"><div class="cal-month">May</div><div class="cal-day">20</div></div>
+          <div>
+            <div class="cal-produce">🍋 Passion Fruit</div>
+            <div class="cal-qty">Est. 80kg available</div>
+          </div>
+          <div class="cal-icon">✏️</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

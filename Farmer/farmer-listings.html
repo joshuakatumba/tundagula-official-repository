@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — My Listings</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #3D2B1F;
+    --harvest: #D4A843;
+    --leaf: #4A7C59;
+    --leaf-light: #6AAF7A;
+    --cream: #FBF6EE;
+    --mist: #F0E8D8;
+    --bark: #6B4226;
+    --text: #2A1F14;
+    --text-soft: #7A6555;
+    --danger: #C0392B;
+    --warning: #E67E22;
+    --sidebar-w: 240px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--mist);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--soil);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+  }
+
+  .sidebar-logo { padding: 24px 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--harvest); }
+  .logo-text span { color: var(--leaf-light); }
+  .logo-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  .sidebar-farmer { padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+  .farmer-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--leaf), var(--harvest)); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; flex-shrink: 0; font-family: 'Playfair Display', serif; }
+  .farmer-name { font-size: 14px; font-weight: 600; color: #fff; }
+  .farmer-status { font-size: 11px; color: var(--leaf-light); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .dot-green { width: 6px; height: 6px; border-radius: 50%; background: var(--leaf-light); }
+
+  .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.25); padding: 12px 10px 6px; margin-top: 8px; }
+  .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+  .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-link.active { background: rgba(212,168,67,0.15); color: var(--harvest); }
+  .nav-icon { width: 18px; text-align: center; font-size: 15px; }
+  .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .sidebar-footer { padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar { background: #fff; padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E8DDD0; position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--soil); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .btn-primary { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; padding: 9px 20px; background: var(--leaf); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .btn-primary:hover { background: #3D6B4A; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74,124,89,0.3); }
+
+  .btn-ghost { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 9px 16px; background: transparent; color: var(--text-soft); border: 1.5px solid #DDD0C0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  .btn-ghost:hover { border-color: var(--leaf); color: var(--leaf); }
+
+  .page-content { padding: 28px 32px 60px; flex: 1; }
+
+  /* FILTER BAR */
+  .filter-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+
+  .filter-tabs { display: flex; gap: 4px; background: #fff; border-radius: 10px; padding: 4px; border: 1px solid #EEE4D8; }
+  .filter-tab { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-soft); transition: all 0.2s; border: none; background: transparent; font-family: 'DM Sans', sans-serif; }
+  .filter-tab.active { background: var(--soil); color: #fff; }
+  .filter-tab:hover:not(.active) { background: var(--mist); color: var(--text); }
+
+  .filter-spacer { flex: 1; }
+
+  .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid #EEE4D8; border-radius: 8px; padding: 8px 14px; }
+  .search-box input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: transparent; width: 180px; }
+  .search-box input::placeholder { color: #C0B0A0; }
+  .search-icon { color: var(--text-soft); font-size: 14px; }
+
+  .sort-select { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 12px; border: 1.5px solid #EEE4D8; border-radius: 8px; background: #fff; color: var(--text); outline: none; cursor: pointer; }
+
+  /* LISTINGS GRID */
+  .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+
+  .listing-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1.5px solid #EEE4D8;
+    overflow: hidden;
+    transition: all 0.25s;
+    animation: fadeUp 0.35s ease both;
+    position: relative;
+  }
+
+  .listing-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(61,43,31,0.1); border-color: #D4C4B0; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .listing-card:nth-child(2) { animation-delay: 0.05s; }
+  .listing-card:nth-child(3) { animation-delay: 0.1s; }
+  .listing-card:nth-child(4) { animation-delay: 0.15s; }
+  .listing-card:nth-child(5) { animation-delay: 0.2s; }
+  .listing-card:nth-child(6) { animation-delay: 0.25s; }
+
+  .listing-card.inactive { opacity: 0.6; }
+
+  .listing-image {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    position: relative;
+  }
+
+  .listing-image.fruit-bg { background: linear-gradient(135deg, #FFF3D0, #FFE4A0); }
+  .listing-image.veggie-bg { background: linear-gradient(135deg, #E8F5EE, #C8E8D0); }
+  .listing-image.dairy-bg { background: linear-gradient(135deg, #EEF4FF, #D8E8FF); }
+  .listing-image.meat-bg { background: linear-gradient(135deg, #FFF0EE, #FFD8D0); }
+
+  .listing-status-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-active { background: rgba(74,124,89,0.15); color: var(--leaf); }
+  .status-inactive { background: rgba(120,110,100,0.15); color: #887870; }
+  .status-low { background: rgba(230,126,34,0.15); color: var(--warning); }
+  .status-promoted { background: rgba(212,168,67,0.2); color: var(--bark); }
+
+  .listing-body { padding: 16px 18px; }
+
+  .listing-category { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); margin-bottom: 4px; }
+  .listing-name { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--soil); margin-bottom: 6px; }
+  .listing-price { font-size: 18px; font-weight: 700; color: var(--leaf); margin-bottom: 2px; }
+  .listing-price span { font-size: 13px; font-weight: 400; color: var(--text-soft); }
+  .listing-stock { font-size: 13px; color: var(--text-soft); margin-bottom: 14px; }
+  .listing-stock strong { color: var(--text); }
+
+  .listing-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-soft);
+    background: var(--mist);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .listing-actions {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid #F4ECE0;
+    padding-top: 14px;
+  }
+
+  .action-btn {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px;
+    border-radius: 7px;
+    border: 1.5px solid #EEE4D8;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-soft);
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .action-btn:hover { border-color: var(--leaf); color: var(--leaf); background: rgba(74,124,89,0.05); }
+  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(192,57,43,0.05); }
+
+  /* ORDER COUNT OVERLAY */
+  .order-count-chip {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: var(--soil);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ADD LISTING CARD */
+  .add-listing-card {
+    background: transparent;
+    border: 2px dashed #D4C4B0;
+    border-radius: 14px;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: var(--text-soft);
+    text-align: center;
+    padding: 24px;
+  }
+
+  .add-listing-card:hover { border-color: var(--leaf); background: rgba(74,124,89,0.04); color: var(--leaf); transform: translateY(-2px); }
+  .add-listing-card .add-icon { font-size: 40px; }
+  .add-listing-card .add-label { font-size: 15px; font-weight: 600; }
+  .add-listing-card .add-sub { font-size: 13px; opacity: 0.7; }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(30,20,10,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: #fff;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.25s;
+    box-shadow: 0 24px 60px rgba(30,20,10,0.25);
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid #F0E8D8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0;
+    background: #fff;
+    z-index: 2;
+  }
+
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--soil); }
+  .modal-close { font-size: 22px; cursor: pointer; color: var(--text-soft); border: none; background: none; line-height: 1; }
+
+  .modal-body { padding: 24px 28px 28px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+  .field label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bark); }
+  .field label .req { color: var(--danger); margin-left: 2px; }
+  .field input, .field select, .field textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 11px 14px;
+    border: 1.5px solid #E8DDD0; border-radius: 8px; background: var(--cream);
+    color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(74,124,89,0.12); background: #fff; }
+  .field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+  .field .hint { font-size: 12px; color: var(--text-soft); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .modal-footer { display: flex; gap: 12px; justify-content: flex-end; padding: 0 28px 24px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap select { width: 100%; padding-right: 32px; cursor: pointer; }
+  .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--bark); pointer-events: none; font-size: 13px; }
+
+  /* CATEGORY EMOJI PICKER */
+  .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 4px; }
+  .emoji-opt { width: 100%; aspect-ratio: 1; border: 1.5px solid #E8DDD0; border-radius: 8px; background: var(--cream); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .emoji-opt:hover { border-color: var(--leaf); transform: scale(1.08); }
+  .emoji-opt.selected { border-color: var(--leaf); background: rgba(74,124,89,0.1); }
+
+  /* STATS BAR */
+  .stats-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat-pill { background: #fff; border: 1px solid #EEE4D8; border-radius: 10px; padding: 12px 18px; display: flex; flex-direction: column; gap: 2px; }
+  .stat-pill-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-soft); }
+  .stat-pill-val { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--soil); }
+  .stat-pill-sub { font-size: 12px; color: var(--leaf); }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 20px 16px 40px; }
+    .topbar { padding: 0 16px; }
+    .listings-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Agri<span>Connect</span></div>
+    <div class="logo-badge">Farmer Portal</div>
+  </div>
+  <div class="sidebar-farmer">
+    <div class="farmer-avatar">ES</div>
+    <div>
+      <div class="farmer-name">Emmanuel Ssekandi</div>
+      <div class="farmer-status"><span class="dot-green"></span> Profile Active</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-link"><span class="nav-icon">📦</span> My Orders <span class="nav-badge">3</span></a>
+    <a class="nav-link active"><span class="nav-icon">🥬</span> My Listings</a>
+    <a class="nav-link"><span class="nav-icon">📅</span> Harvest Calendar</a>
+    <div class="nav-section-label">Finance</div>
+    <a class="nav-link"><span class="nav-icon">💰</span> Earnings</a>
+    <a class="nav-link"><span class="nav-icon">📱</span> MoMo Payments</a>
+    <div class="nav-section-label">Profile</div>
+    <a class="nav-link"><span class="nav-icon">👨‍🌾</span> My Farm Profile</a>
+    <a class="nav-link"><span class="nav-icon">⭐</span> My Reviews</a>
+    <a class="nav-link"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-footer">AgriConnect v1.0 · Uganda</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <div class="topbar">
+    <div class="topbar-title">My Listings</div>
+    <div class="topbar-right">
+      <button class="btn-ghost">📤 Export</button>
+      <button class="btn-primary" onclick="openModal()">＋ Add New Listing</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <div class="stat-pill">
+        <div class="stat-pill-label">Total Listings</div>
+        <div class="stat-pill-val">7</div>
+        <div class="stat-pill-sub">across 2 categories</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">Active</div>
+        <div class="stat-pill-val">6</div>
+        <div class="stat-pill-sub">receiving orders</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">Orders this month</div>
+        <div class="stat-pill-val">14</div>
+        <div class="stat-pill-sub">↑ 3 vs last month</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">Revenue from listings</div>
+        <div class="stat-pill-val">UGX 842K</div>
+        <div class="stat-pill-sub">April 2026</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter(this,'all')">All (7)</button>
+        <button class="filter-tab" onclick="setFilter(this,'active')">Active (6)</button>
+        <button class="filter-tab" onclick="setFilter(this,'inactive')">Inactive (1)</button>
+        <button class="filter-tab" onclick="setFilter(this,'low')">Low Stock (2)</button>
+      </div>
+      <div class="filter-spacer"></div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search listings...">
+      </div>
+      <select class="sort-select">
+        <option>Sort: Most recent</option>
+        <option>Sort: Most orders</option>
+        <option>Sort: Price high–low</option>
+        <option>Sort: Low stock first</option>
+      </select>
+    </div>
+
+    <!-- LISTINGS GRID -->
+    <div class="listings-grid">
+
+      <!-- LISTING 1 -->
+      <div class="listing-card">
+        <div class="listing-image fruit-bg">
+          🍍
+          <div class="order-count-chip">📦 6 orders</div>
+          <div class="listing-status-badge status-active">Active</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-category">Fruits</div>
+          <div class="listing-name">Fresh Kayunga Pineapples</div>
+          <div class="listing-price">UGX 5,000 <span>/ kg</span></div>
+          <div class="listing-stock">In stock: <strong>320 kg</strong> available</div>
+          <div class="listing-meta">
+            <div class="meta-chip">📦 Min. 20kg</div>
+            <div class="meta-chip">🚗 Self-deliver</div>
+            <div class="meta-chip">⭐ 4.9</div>
+          </div>
+          <div class="listing-actions">
+            <button class="action-btn" onclick="openModal()">✏️ Edit</button>
+            <button class="action-btn">📊 Stats</button>
+            <button class="action-btn danger">⏸ Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTING 2 -->
+      <div class="listing-card">
+        <div class="listing-image fruit-bg">
+          🥭
+          <div class="order-count-chip">📦 4 orders</div>
+          <div class="listing-status-badge status-low">Low Stock</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-category">Fruits</div>
+          <div class="listing-name">Mango (Ngowe Variety)</div>
+          <div class="listing-price">UGX 7,000 <span>/ kg</span></div>
+          <div class="listing-stock">In stock: <strong style="color:var(--warning)">18 kg</strong> — restock soon</div>
+          <div class="listing-meta">
+            <div class="meta-chip">📦 Min. 10kg</div>
+            <div class="meta-chip">🏠 Pickup only</div>
+            <div class="meta-chip">⭐ 4.7</div>
+          </div>
+          <div class="listing-actions">
+            <button class="action-btn" onclick="openModal()">✏️ Edit</button>
+            <button class="action-btn">📊 Stats</button>
+            <button class="action-btn danger">⏸ Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTING 3 -->
+      <div class="listing-card">
+        <div class="listing-image fruit-bg">
+          🍋
+          <div class="order-count-chip">📦 2 orders</div>
+          <div class="listing-status-badge status-active">Active</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-category">Fruits</div>
+          <div class="listing-name">Passion Fruit</div>
+          <div class="listing-price">UGX 8,000 <span>/ kg</span></div>
+          <div class="listing-stock">In stock: <strong>80 kg</strong> available</div>
+          <div class="listing-meta">
+            <div class="meta-chip">📦 Min. 5kg</div>
+            <div class="meta-chip">🚗 Self-deliver</div>
+            <div class="meta-chip">⭐ 4.8</div>
+          </div>
+          <div class="listing-actions">
+            <button class="action-btn" onclick="openModal()">✏️ Edit</button>
+            <button class="action-btn">📊 Stats</button>
+            <button class="action-btn danger">⏸ Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTING 4 -->
+      <div class="listing-card">
+        <div class="listing-image fruit-bg">
+          🍉
+          <div class="order-count-chip">📦 1 order</div>
+          <div class="listing-status-badge status-low">Low Stock</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-category">Fruits</div>
+          <div class="listing-name">Watermelon</div>
+          <div class="listing-price">UGX 3,500 <span>/ kg</span></div>
+          <div class="listing-stock">In stock: <strong style="color:var(--warning)">25 kg</strong> — restock soon</div>
+          <div class="listing-meta">
+            <div class="meta-chip">📦 Min. 20kg</div>
+            <div class="meta-chip">🏠 Pickup only</div>
+          </div>
+          <div class="listing-actions">
+            <button class="action-btn" onclick="openModal()">✏️ Edit</button>
+            <button class="action-btn">📊 Stats</button>
+            <button class="action-btn danger">⏸ Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTING 5 -->
+      <div class="listing-card">
+        <div class="listing-image veggie-bg">
+          🥬
+          <div class="order-count-chip">📦 1 order</div>
+          <div class="listing-status-badge status-active">Active</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-category">Vegetables</div>
+          <div class="listing-name">Sukuma Wiki (Kale)</div>
+          <div class="listing-price">UGX 2,500 <span>/ kg</span></div>
+          <div class="listing-stock">In stock: <strong>60 kg</strong> available</div>
+          <div class="listing-meta">
+            <div class="meta-chip">📦 Min. 10kg</div>
+            <div class="meta-chip">🚗 Self-deliver</div>
+          </div>
+          <div class="listing-actions">
+            <button class="action-btn" onclick="openModal()">✏️ Edit</button>
+            <button class="action-btn">📊 Stats</button>
+            <button class="action-btn danger">⏸ Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTING 6 — INACTIVE -->
+      <div class="listing-card inactive">
+        <div class="listing-image fruit-bg">
+          🍌
+          <div class="listing-status-badge status-inactive">Paused</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-category">Fruits</div>
+          <div class="listing-name">Matooke (Cooking Bananas)</div>
+          <div class="listing-price">UGX 4,000 <span>/ bunch</span></div>
+          <div class="listing-stock">Paused — out of season</div>
+          <div class="listing-meta">
+            <div class="meta-chip">📦 Min. 5 bunches</div>
+            <div class="meta-chip">🏠 Pickup only</div>
+          </div>
+          <div class="listing-actions">
+            <button class="action-btn" onclick="openModal()">✏️ Edit</button>
+            <button class="action-btn" style="color:var(--leaf);border-color:var(--leaf)">▶ Activate</button>
+            <button class="action-btn danger">🗑 Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD NEW -->
+      <div class="add-listing-card" onclick="openModal()">
+        <div class="add-icon">＋</div>
+        <div class="add-label">Add New Listing</div>
+        <div class="add-sub">Post a new produce item for restaurants to discover</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT LISTING MODAL -->
+<div class="modal-overlay" id="listingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Listing</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="field">
+        <label>Produce Name <span class="req">*</span></label>
+        <input type="text" placeholder="e.g. Fresh Kayunga Pineapples">
+      </div>
+
+      <div class="field">
+        <label>Category <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select>
+            <option value="">Select category</option>
+            <option>🍍 Fruits</option>
+            <option>🥬 Vegetables</option>
+            <option>🥩 Meat</option>
+            <option>🥛 Dairy</option>
+            <option>🌾 Grains</option>
+            <option>🐓 Poultry & Eggs</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Choose an Icon for Your Listing</label>
+        <div class="emoji-grid" id="emojiPicker">
+          <div class="emoji-opt selected" onclick="pickEmoji(this)">🍍</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🥭</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🍋</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🍉</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🍌</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🥥</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🥬</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🍅</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🧅</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🥩</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🥛</div>
+          <div class="emoji-opt" onclick="pickEmoji(this)">🐓</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Price <span class="req">*</span></label>
+          <input type="number" placeholder="e.g. 5000">
+          <div class="hint">In UGX</div>
+        </div>
+        <div class="field">
+          <label>Unit <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select>
+              <option>per kg</option>
+              <option>per litre</option>
+              <option>per crate</option>
+              <option>per bunch</option>
+              <option>per piece</option>
+              <option>per tray</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Stock Available <span class="req">*</span></label>
+          <input type="number" placeholder="e.g. 200">
+          <div class="hint">Total quantity you have now</div>
+        </div>
+        <div class="field">
+          <label>Minimum Order</label>
+          <input type="number" placeholder="e.g. 20">
+          <div class="hint">Minimum a restaurant can order</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Description</label>
+        <textarea placeholder="Describe your produce — variety, growing method, what makes it fresh and special. Restaurants read this."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Delivery Options <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select>
+            <option>I can self-deliver</option>
+            <option>Buyer must collect / pickup only</option>
+            <option>Both options available</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Next Harvest Date</label>
+          <input type="date">
+          <div class="hint">Helps restaurants plan purchases</div>
+        </div>
+        <div class="field">
+          <label>Listing Status</label>
+          <div class="select-wrap">
+            <select>
+              <option>Active — visible to restaurants</option>
+              <option>Inactive / Draft</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary">✓ Save Listing</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal() {
+    document.getElementById('listingModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('listingModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('listingModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  function setFilter(btn, filter) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function pickEmoji(el) {
+    document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+</script>
+
+</body>
+</html>

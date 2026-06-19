@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect Admin — Analytics & Disputes</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0D0F14;--surface:#13161E;--panel:#1A1E28;--border:#252A38;--border-light:#2E3448;
+    --accent:#4F6EF7;--green:#22C55E;--amber:#F59E0B;--red:#EF4444;--purple:#A855F7;
+    --text:#E8ECF4;--text-soft:#8892A8;--text-muted:#4A5270;
+    --mono:'IBM Plex Mono',monospace;--sans:'Manrope',sans-serif;--sw:220px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;}
+  .sb-logo{padding:20px 18px;border-bottom:1px solid var(--border);}
+  .sb-logo-text{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);}
+  .sb-logo-sub{font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;font-family:var(--mono);}
+  .sb-admin{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .sb-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+  .sb-name{font-size:13px;font-weight:600;color:var(--text);}
+  .sb-role{font-size:10px;color:var(--text-muted);font-family:var(--mono);margin-top:1px;}
+  .sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:1px;overflow-y:auto;}
+  .sb-sec{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);padding:12px 8px 5px;}
+  .sb-link{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;font-size:13px;color:var(--text-soft);cursor:pointer;transition:all 0.15s;}
+  .sb-link:hover{background:var(--panel);color:var(--text);}
+  .sb-link.active{background:rgba(79,110,247,0.15);color:var(--accent);}
+  .sb-icon{font-size:14px;width:16px;text-align:center;}
+  .sb-badge{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;}
+  .sb-badge.red{background:rgba(239,68,68,0.15);color:var(--red);}
+  .sb-badge.amber{background:rgba(245,158,11,0.15);color:var(--amber);}
+  .sb-footer{padding:14px 18px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text-muted);}
+
+  .main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);height:54px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;}
+  .topbar-tabs{display:flex;height:100%;align-items:flex-end;gap:0;}
+  .ttab{font-family:var(--mono);font-size:12px;padding:0 20px;height:100%;display:flex;align-items:center;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
+  .ttab:hover{color:var(--text-soft);}
+  .ttab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .topbar-right{display:flex;gap:10px;}
+  .icon-btn{width:32px;height:32px;background:var(--panel);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
+
+  .content{padding:24px 28px 60px;}
+
+  /* PAGE TABS */
+  .page-section{display:none;}
+  .page-section.show{display:block;}
+
+  /* ─── ANALYTICS ─── */
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;animation:riseIn 0.4s ease both;}
+  @keyframes riseIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .kpi:nth-child(n){animation-delay:calc(var(--i,0)*0.05s);}
+  .kpi-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;}
+  .kpi-val{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .kpi-delta{font-family:var(--mono);font-size:11px;}
+  .kpi-delta.up{color:var(--green);}.kpi-delta.down{color:var(--red);}.kpi-delta.flat{color:var(--text-muted);}
+
+  .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .analytics-grid.three{grid-template-columns:1fr 1fr 1fr;}
+
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;animation:riseIn 0.4s 0.08s ease both;}
+  .ph{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .ph-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);}
+  .ph-link{font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;}
+  .pb{padding:16px 18px;}
+
+  /* BAR CHART */
+  .bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;margin-bottom:10px;}
+  .bc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .bc-bar{width:100%;border-radius:3px 3px 0 0;min-height:4px;}
+  .bc-bar.accent{background:var(--accent);}
+  .bc-bar.green{background:var(--green);}
+  .bc-bar.amber{background:var(--amber);}
+  .bc-bar.dim{background:var(--border-light);}
+  .bc-label{font-family:var(--mono);font-size:9px;color:var(--text-muted);}
+  .bc-val{font-family:var(--mono);font-size:9px;color:var(--text-soft);}
+
+  /* DONUT (CSS) */
+  .donut-row{display:flex;flex-direction:column;gap:8px;}
+  .donut-item{display:flex;align-items:center;gap:10px;}
+  .donut-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:3px;}
+  .donut-bar{height:100%;border-radius:3px;}
+  .donut-label{font-size:13px;color:var(--text-soft);min-width:100px;}
+  .donut-pct{font-family:var(--mono);font-size:12px;color:var(--text-muted);min-width:36px;text-align:right;}
+
+  /* DATA TABLE */
+  .dt{width:100%;border-collapse:collapse;}
+  .dt th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0 0 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .dt td{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-soft);}
+  .dt tr:last-child td{border-bottom:none;}
+  .td-main{color:var(--text)!important;font-weight:600;}
+  .td-mono{font-family:var(--mono);font-size:12px;}
+
+  .badge{display:inline-flex;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;}
+  .badge.green{background:rgba(34,197,94,0.12);color:var(--green);}
+  .badge.amber{background:rgba(245,158,11,0.12);color:var(--amber);}
+  .badge.red{background:rgba(239,68,68,0.12);color:var(--red);}
+  .badge.blue{background:rgba(79,110,247,0.12);color:var(--accent);}
+  .badge.gray{background:rgba(74,82,112,0.25);color:var(--text-soft);}
+  .badge.purple{background:rgba(168,85,247,0.12);color:var(--purple);}
+
+  /* ─── DISPUTES ─── */
+  .dispute-layout{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:flex-start;}
+
+  .dispute-list{display:flex;flex-direction:column;gap:12px;}
+
+  .disp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color 0.2s;animation:riseIn 0.35s ease both;}
+  .disp-card:hover{border-color:var(--border-light);}
+  .disp-card.selected{border-color:var(--red);background:rgba(239,68,68,0.03);}
+  .disp-card.resolved{opacity:0.6;}
+
+  .dc-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);}
+  .dc-id{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--red);}
+  .dc-title{font-size:14px;font-weight:700;color:var(--text);margin-top:2px;}
+  .dc-meta{font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .dc-badge-wrap{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .dc-time{font-family:var(--mono);font-size:10px;color:var(--text-muted);}
+
+  .dc-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .dc-field-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:3px;}
+  .dc-field-val{font-size:13px;color:var(--text-soft);}
+  .dc-field-val strong{color:var(--text);}
+
+  .dc-actions{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--border);}
+  .da-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid;transition:all 0.15s;flex:1;text-align:center;}
+  .da-btn.resolve{border-color:rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.08);}
+  .da-btn.resolve:hover{background:rgba(34,197,94,0.2);}
+  .da-btn.escalate{border-color:rgba(239,68,68,0.3);color:var(--red);background:rgba(239,68,68,0.08);}
+  .da-btn.escalate:hover{background:rgba(239,68,68,0.2);}
+  .da-btn.refund{border-color:rgba(245,158,11,0.3);color:var(--amber);background:rgba(245,158,11,0.08);}
+  .da-btn.refund:hover{background:rgba(245,158,11,0.2);}
+  .da-btn.contact{border-color:var(--border);color:var(--text-soft);background:transparent;}
+  .da-btn.contact:hover{border-color:var(--border-light);color:var(--text);}
+
+  /* DISPUTE DETAIL */
+  .dd-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:74px;}
+  .dd-header{background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.2);padding:16px 20px;}
+  .dd-id{font-family:var(--mono);font-size:11px;color:var(--red);}
+  .dd-title{font-size:15px;font-weight:700;color:var(--text);margin-top:4px;}
+
+  .dd-section{padding:16px 20px;border-bottom:1px solid var(--border);}
+  .dd-section:last-child{border-bottom:none;}
+  .dd-sec-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:10px;}
+  .dd-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;}
+  .dd-key{color:var(--text-muted);}
+  .dd-val{color:var(--text);font-weight:500;}
+
+  .timeline{display:flex;flex-direction:column;gap:0;}
+  .tl-item{display:flex;gap:12px;padding:8px 0;position:relative;}
+  .tl-item::before{content:'';position:absolute;left:7px;top:24px;bottom:-8px;width:1px;background:var(--border);}
+  .tl-item:last-child::before{display:none;}
+  .tl-dot{width:16px;height:16px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:3px;}
+  .tl-dot.red{border-color:var(--red);background:rgba(239,68,68,0.2);}
+  .tl-dot.amber{border-color:var(--amber);background:rgba(245,158,11,0.2);}
+  .tl-dot.blue{border-color:var(--accent);background:rgba(79,110,247,0.2);}
+  .tl-text{font-size:12px;color:var(--text-soft);line-height:1.5;}
+  .tl-text strong{color:var(--text);}
+  .tl-time{font-family:var(--mono);font-size:10px;color:var(--text-muted);display:block;margin-top:2px;}
+
+  .dd-actions{padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+  .dda-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:10px;border-radius:7px;cursor:pointer;border:1px solid;text-align:center;transition:all 0.15s;}
+  .dda-btn.resolve{border-color:rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.08);}
+  .dda-btn.resolve:hover{background:rgba(34,197,94,0.2);}
+  .dda-btn.refund{border-color:rgba(245,158,11,0.3);color:var(--amber);background:rgba(245,158,11,0.08);}
+  .dda-btn.refund:hover{background:rgba(245,158,11,0.2);}
+  .dda-btn.ghost{border-color:var(--border);color:var(--text-soft);background:transparent;}
+  .dda-btn.ghost:hover{border-color:var(--border-light);color:var(--text);}
+
+  .note-box{background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text-muted);width:100%;resize:vertical;min-height:60px;outline:none;}
+  .note-box:focus{border-color:var(--accent);color:var(--text);}
+
+  @media(max-width:1100px){.dispute-layout,.analytics-grid{grid-template-columns:1fr;}.dd-panel{position:relative;top:0;}.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:900px){.sidebar{transform:translateX(-100%);}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo"><div class="sb-logo-text">// AGRICONNECT</div><div class="sb-logo-sub">Admin Console v1.0</div></div>
+  <div class="sb-admin"><div class="sb-dot"></div><div><div class="sb-name">David Onyango</div><div class="sb-role">SUPER_ADMIN</div></div></div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Platform</div>
+    <a class="sb-link"><span class="sb-icon">⬛</span> Overview</a>
+    <a class="sb-link active"><span class="sb-icon">📊</span> Analytics</a>
+    <div class="sb-sec">Users</div>
+    <a class="sb-link"><span class="sb-icon">👨‍🌾</span> Farmers <span class="sb-badge amber">7</span></a>
+    <a class="sb-link"><span class="sb-icon">🍽</span> Restaurants</a>
+    <a class="sb-link"><span class="sb-icon">✅</span> Verification Queue <span class="sb-badge red">5</span></a>
+    <div class="sb-sec">Operations</div>
+    <a class="sb-link"><span class="sb-icon">📦</span> Orders</a>
+    <a class="sb-link"><span class="sb-icon">⚠️</span> Disputes <span class="sb-badge red">2</span></a>
+    <a class="sb-link"><span class="sb-icon">🚚</span> Logistics</a>
+    <a class="sb-link"><span class="sb-icon">💳</span> Escrow & Payments</a>
+    <div class="sb-sec">Finance</div>
+    <a class="sb-link"><span class="sb-icon">💰</span> Revenue</a>
+    <div class="sb-sec">System</div>
+    <a class="sb-link"><span class="sb-icon">⚙️</span> Settings</a>
+    <a class="sb-link"><span class="sb-icon">📋</span> Audit Log</a>
+  </nav>
+  <div class="sb-footer">v1.0.0 · UG · 01 Apr 2026</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-tabs">
+      <div class="ttab active" onclick="switchTab('analytics',this)">📊 Analytics</div>
+      <div class="ttab" onclick="switchTab('disputes',this)">⚠️ Disputes & Logistics</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">⚙️</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── ANALYTICS ── -->
+    <div class="page-section show" id="sec-analytics">
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">GMV (Apr)</div><div class="kpi-val">74.2M</div><div class="kpi-delta up">↑ 31% vs Mar</div></div>
+        <div class="kpi"><div class="kpi-label">Platform Revenue</div><div class="kpi-val">2.83M</div><div class="kpi-delta up">↑ 28%</div></div>
+        <div class="kpi"><div class="kpi-label">Active Farmers</div><div class="kpi-val">218</div><div class="kpi-delta up">+12 this month</div></div>
+        <div class="kpi"><div class="kpi-label">Active Restaurants</div><div class="kpi-val">91</div><div class="kpi-delta up">+8 this month</div></div>
+        <div class="kpi"><div class="kpi-label">Order Count</div><div class="kpi-val">347</div><div class="kpi-delta up">↑ 23%</div></div>
+      </div>
+
+      <div class="analytics-grid">
+        <!-- GMV BY MONTH -->
+        <div class="panel">
+          <div class="ph"><div class="ph-title">GMV_BY_MONTH // UGX millions</div><span class="ph-link">export</span></div>
+          <div class="pb">
+            <div class="bar-chart">
+              <div class="bc-col"><div class="bc-bar dim" style="height:28%;"></div><div class="bc-val">18M</div><div class="bc-label">Oct</div></div>
+              <div class="bc-col"><div class="bc-bar dim" style="height:34%;"></div><div class="bc-val">22M</div><div class="bc-label">Nov</div></div>
+              <div class="bc-col"><div class="bc-bar dim" style="height:40%;"></div><div class="bc-val">26M</div><div class="bc-label">Dec</div></div>
+              <div class="bc-col"><div class="bc-bar dim" style="height:45%;"></div><div class="bc-val">30M</div><div class="bc-label">Jan</div></div>
+              <div class="bc-col"><div class="bc-bar dim" style="height:55%;"></div><div class="bc-val">36M</div><div class="bc-label">Feb</div></div>
+              <div class="bc-col"><div class="bc-bar dim" style="height:85%;"></div><div class="bc-val">56M</div><div class="bc-label">Mar</div></div>
+              <div class="bc-col"><div class="bc-bar accent" style="height:100%;"></div><div class="bc-val">74M</div><div class="bc-label">Apr</div></div>
+            </div>
+            <div style="display:flex;gap:20px;padding-top:12px;border-top:1px solid var(--border);">
+              <div><div style="font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-bottom:3px;">TOTAL YTD</div><div style="font-family:var(--mono);font-size:16px;color:var(--accent);">244M UGX</div></div>
+              <div><div style="font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-bottom:3px;">PROJ. ANNUAL</div><div style="font-family:var(--mono);font-size:16px;color:var(--green);">~890M UGX</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRODUCE BREAKDOWN -->
+        <div class="panel">
+          <div class="ph"><div class="ph-title">PRODUCE_CATEGORY // order share</div></div>
+          <div class="pb">
+            <div class="donut-row">
+              <div class="donut-item"><span class="donut-label">🍍 Fruits</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:42%;background:var(--accent);"></div></div><span class="donut-pct">42%</span></div>
+              <div class="donut-item"><span class="donut-label">🥬 Vegetables</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:28%;background:var(--green);"></div></div><span class="donut-pct">28%</span></div>
+              <div class="donut-item"><span class="donut-label">🥛 Dairy</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:15%;background:var(--amber);"></div></div><span class="donut-pct">15%</span></div>
+              <div class="donut-item"><span class="donut-label">🥩 Meat</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:10%;background:var(--red);"></div></div><span class="donut-pct">10%</span></div>
+              <div class="donut-item"><span class="donut-label">🐓 Poultry</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:5%;background:var(--purple);"></div></div><span class="donut-pct">5%</span></div>
+            </div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-bottom:8px;">TOP DISTRICTS BY ORDER COUNT</div>
+              <div class="donut-row">
+                <div class="donut-item"><span class="donut-label" style="min-width:80px;">Wakiso</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:75%;background:var(--accent);"></div></div><span class="donut-pct">138</span></div>
+                <div class="donut-item"><span class="donut-label" style="min-width:80px;">Kayunga</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:52%;background:var(--accent);"></div></div><span class="donut-pct">95</span></div>
+                <div class="donut-item"><span class="donut-label" style="min-width:80px;">Mbarara</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:38%;background:var(--accent);"></div></div><span class="donut-pct">70</span></div>
+                <div class="donut-item"><span class="donut-label" style="min-width:80px;">Luwero</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:24%;background:var(--accent);"></div></div><span class="donut-pct">44</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP FARMERS TABLE -->
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="ph"><div class="ph-title">TOP_FARMERS // by revenue generated</div><span class="ph-link">view all</span></div>
+        <div class="pb" style="padding:0 18px;">
+          <table class="dt">
+            <thead><tr><th>#</th><th>Farmer</th><th>District</th><th>Category</th><th>Orders</th><th>GMV</th><th>Rating</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="td-mono" style="color:var(--amber);">01</td><td class="td-main">Emmanuel Ssekandi</td><td>Kayunga</td><td>Fruits</td><td class="td-mono">47</td><td class="td-mono" style="color:var(--green);">9.8M</td><td class="td-mono" style="color:var(--amber);">4.9★</td><td><span class="badge green">ACTIVE</span></td></tr>
+              <tr><td class="td-mono" style="color:var(--amber);">02</td><td class="td-main">Byamukama Moses</td><td>Mbarara</td><td>Dairy</td><td class="td-mono">62</td><td class="td-mono" style="color:var(--green);">8.4M</td><td class="td-mono" style="color:var(--amber);">4.6★</td><td><span class="badge green">ACTIVE</span></td></tr>
+              <tr><td class="td-mono" style="color:var(--amber);">03</td><td class="td-main">Nakato Ketty</td><td>Luwero</td><td>Meat</td><td class="td-mono">31</td><td class="td-mono" style="color:var(--green);">7.1M</td><td class="td-mono" style="color:var(--amber);">4.7★</td><td><span class="badge green">ACTIVE</span></td></tr>
+              <tr><td class="td-mono" style="color:var(--text-muted);">04</td><td class="td-main">Apio Christine</td><td>Wakiso</td><td>Poultry</td><td class="td-mono">55</td><td class="td-mono" style="color:var(--green);">6.6M</td><td class="td-mono" style="color:var(--amber);">4.9★</td><td><span class="badge green">ACTIVE</span></td></tr>
+              <tr><td class="td-mono" style="color:var(--text-muted);">05</td><td class="td-main">Akello Nancy</td><td>Wakiso</td><td>Vegetables</td><td class="td-mono">38</td><td class="td-mono" style="color:var(--green);">4.2M</td><td class="td-mono" style="color:var(--amber);">4.8★</td><td><span class="badge green">ACTIVE</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RESTAURANT & REVENUE BREAKDOWN -->
+      <div class="analytics-grid three">
+        <div class="panel">
+          <div class="ph"><div class="ph-title">REVENUE_STREAMS</div></div>
+          <div class="pb">
+            <div class="donut-row">
+              <div class="donut-item"><span class="donut-label">Transaction Fees</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:60%;background:var(--accent);"></div></div><span class="donut-pct">61%</span></div>
+              <div class="donut-item"><span class="donut-label">Farmer Subs</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:25%;background:var(--green);"></div></div><span class="donut-pct">26%</span></div>
+              <div class="donut-item"><span class="donut-label">Restaurant Subs</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:13%;background:var(--amber);"></div></div><span class="donut-pct">13%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">ESCROW_STATUS</div></div>
+          <div class="pb">
+            <div style="font-family:var(--mono);font-size:22px;color:var(--amber);margin-bottom:6px;">UGX 4.2M</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-bottom:14px;">currently held in escrow</div>
+            <div class="donut-row">
+              <div class="donut-item"><span class="donut-label">Awaiting delivery</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:70%;background:var(--amber);"></div></div><span class="donut-pct">2.94M</span></div>
+              <div class="donut-item"><span class="donut-label">Pending confirm</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:30%;background:var(--blue,#3498DB);"></div></div><span class="donut-pct">1.26M</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">GROWTH_METRICS</div></div>
+          <div class="pb">
+            <div class="donut-row">
+              <div class="donut-item"><span class="donut-label">Farmer growth</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:80%;background:var(--green);"></div></div><span class="donut-pct">+4.4%</span></div>
+              <div class="donut-item"><span class="donut-label">Restaurant growth</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:65%;background:var(--accent);"></div></div><span class="donut-pct">+9.6%</span></div>
+              <div class="donut-item"><span class="donut-label">Repeat order rate</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:74%;background:var(--purple);"></div></div><span class="donut-pct">74%</span></div>
+              <div class="donut-item"><span class="donut-label">Churn rate</span><div class="donut-bar-wrap"><div class="donut-bar" style="width:23%;background:var(--red);"></div></div><span class="donut-pct">2.3%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DISPUTES & LOGISTICS ── -->
+    <div class="page-section" id="sec-disputes">
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi"><div class="kpi-label">Open Disputes</div><div class="kpi-val" style="color:var(--red);">2</div><div class="kpi-delta flat">requires action</div></div>
+        <div class="kpi"><div class="kpi-label">Resolved (Apr)</div><div class="kpi-val" style="color:var(--green);">8</div><div class="kpi-delta up">avg: 18hrs to resolve</div></div>
+        <div class="kpi"><div class="kpi-label">Dispute Rate</div><div class="kpi-val" style="color:var(--amber);">1.4%</div><div class="kpi-delta up">↓ from 2.1% Mar</div></div>
+        <div class="kpi"><div class="kpi-label">Escrow at Risk</div><div class="kpi-val" style="color:var(--amber);">592K</div><div class="kpi-delta flat">UGX in disputed orders</div></div>
+      </div>
+
+      <div class="dispute-layout">
+        <div class="dispute-list">
+
+          <!-- DISPUTE 1 — selected -->
+          <div class="disp-card selected">
+            <div class="dc-head">
+              <div>
+                <div class="dc-id">#D-019</div>
+                <div class="dc-title">Quality Rejection — Watermelon delivery</div>
+                <div class="dc-meta">The Lawns Restaurant vs Otim James · Order #AGC-843</div>
+              </div>
+              <div class="dc-badge-wrap">
+                <span class="badge red">OPEN</span>
+                <span class="dc-time">Opened 38min ago</span>
+              </div>
+            </div>
+            <div class="dc-body">
+              <div><div class="dc-field-label">Order Value</div><div class="dc-field-val"><strong>UGX 112,000</strong></div></div>
+              <div><div class="dc-field-label">Issue Type</div><div class="dc-field-val"><strong>Quality Dispute</strong></div></div>
+              <div><div class="dc-field-label">Escrow Status</div><div class="dc-field-val" style="color:var(--amber);"><strong>HELD</strong></div></div>
+            </div>
+            <div class="dc-actions">
+              <button class="da-btn resolve">✓ Resolve</button>
+              <button class="da-btn refund">↩ Partial Refund</button>
+              <button class="da-btn escalate">⬆ Escalate</button>
+              <button class="da-btn contact">📞 Contact Both</button>
+            </div>
+          </div>
+
+          <!-- DISPUTE 2 -->
+          <div class="disp-card">
+            <div class="dc-head">
+              <div>
+                <div class="dc-id">#D-018</div>
+                <div class="dc-title">Late Delivery — No-show farmer</div>
+                <div class="dc-meta">Fang Fang Restaurant vs Mugisha Peter · Order #AGC-839</div>
+              </div>
+              <div class="dc-badge-wrap">
+                <span class="badge red">OPEN</span>
+                <span class="dc-time">Opened 2hrs ago</span>
+              </div>
+            </div>
+            <div class="dc-body">
+              <div><div class="dc-field-label">Order Value</div><div class="dc-field-val"><strong>UGX 480,000</strong></div></div>
+              <div><div class="dc-field-label">Issue Type</div><div class="dc-field-val"><strong>Non-Delivery</strong></div></div>
+              <div><div class="dc-field-label">Escrow Status</div><div class="dc-field-val" style="color:var(--amber);"><strong>HELD</strong></div></div>
+            </div>
+            <div class="dc-actions">
+              <button class="da-btn resolve">✓ Resolve</button>
+              <button class="da-btn refund">↩ Full Refund</button>
+              <button class="da-btn escalate">⬆ Escalate</button>
+              <button class="da-btn contact">📞 Contact Both</button>
+            </div>
+          </div>
+
+          <!-- DISPUTE 3 — resolved -->
+          <div class="disp-card resolved">
+            <div class="dc-head">
+              <div>
+                <div class="dc-id">#D-017</div>
+                <div class="dc-title">Short Delivery — Missing 8kg from order</div>
+                <div class="dc-meta">Café Javas vs Byamukama Moses · Order #AGC-831</div>
+              </div>
+              <div class="dc-badge-wrap">
+                <span class="badge green">RESOLVED</span>
+                <span class="dc-time">Resolved in 14hrs</span>
+              </div>
+            </div>
+            <div class="dc-body">
+              <div><div class="dc-field-label">Order Value</div><div class="dc-field-val"><strong>UGX 240,000</strong></div></div>
+              <div><div class="dc-field-label">Resolution</div><div class="dc-field-val" style="color:var(--green);"><strong>Partial Refund</strong></div></div>
+              <div><div class="dc-field-label">Refund Amount</div><div class="dc-field-val"><strong>UGX 48,000</strong></div></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DISPUTE DETAIL PANEL -->
+        <div class="dd-panel">
+          <div class="dd-header">
+            <div class="dd-id">// DISPUTE #D-019 · OPEN</div>
+            <div class="dd-title">Quality Rejection — Watermelon</div>
+          </div>
+
+          <div class="dd-section">
+            <div class="dd-sec-title">Dispute Details</div>
+            <div class="dd-row"><span class="dd-key">Restaurant</span><span class="dd-val">The Lawns Restaurant</span></div>
+            <div class="dd-row"><span class="dd-key">Farmer</span><span class="dd-val">Otim James</span></div>
+            <div class="dd-row"><span class="dd-key">Order</span><span class="dd-val" style="font-family:var(--mono);font-size:12px;">#AGC-843</span></div>
+            <div class="dd-row"><span class="dd-key">Order Value</span><span class="dd-val">UGX 112,000</span></div>
+            <div class="dd-row"><span class="dd-key">Escrow</span><span class="dd-val" style="color:var(--amber);">HELD — not released</span></div>
+            <div class="dd-row"><span class="dd-key">Restaurant's claim</span><span class="dd-val" style="max-width:160px;text-align:right;font-size:12px;">"Watermelons arrived overripe, 30% unusable"</span></div>
+          </div>
+
+          <div class="dd-section">
+            <div class="dd-sec-title">Dispute Timeline</div>
+            <div class="timeline">
+              <div class="tl-item"><div class="tl-dot blue"></div><div><div class="tl-text"><strong>Order placed</strong> by The Lawns</div><span class="tl-time">27 Mar 09:14</span></div></div>
+              <div class="tl-item"><div class="tl-dot blue"></div><div><div class="tl-text"><strong>Farmer confirmed</strong> — Otim James accepted</div><span class="tl-time">27 Mar 11:30</span></div></div>
+              <div class="tl-item"><div class="tl-dot amber"></div><div><div class="tl-text"><strong>Delivered</strong> — restaurant signed receipt</div><span class="tl-time">28 Mar 08:45</span></div></div>
+              <div class="tl-item"><div class="tl-dot red"></div><div><div class="tl-text"><strong>Dispute opened</strong> — quality rejected on inspection</div><span class="tl-time">28 Mar 15:22</span></div></div>
+              <div class="tl-item"><div class="tl-dot blue"></div><div><div class="tl-text"><strong>Admin notified</strong> — awaiting review</div><span class="tl-time">28 Mar 15:22</span></div></div>
+            </div>
+          </div>
+
+          <div class="dd-section">
+            <div class="dd-sec-title">Admin Resolution Note</div>
+            <textarea class="note-box" placeholder="Document resolution decision and reasoning..."></textarea>
+          </div>
+
+          <div class="dd-actions">
+            <button class="dda-btn resolve">✓ MARK RESOLVED — Release Escrow to Farmer</button>
+            <button class="dda-btn refund">↩ PARTIAL REFUND — Release portion to restaurant</button>
+            <button class="dda-btn ghost">📞 Request evidence from both parties</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function switchTab(id, el) {
+    document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('show'));
+    document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('sec-'+id).classList.add('show');
+    el.classList.add('active');
+    // update sidebar active
+    if(id==='disputes') document.querySelector('.sb-link.active').classList.remove('active');
+  }
+</script>
+</body>
+</html>

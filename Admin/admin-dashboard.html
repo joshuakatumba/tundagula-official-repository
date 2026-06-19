@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect Admin — Platform Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0F14;
+    --surface: #13161E;
+    --panel: #1A1E28;
+    --border: #252A38;
+    --border-light: #2E3448;
+    --accent: #4F6EF7;
+    --accent-dim: #3A52C4;
+    --green: #22C55E;
+    --green-dim: #16A34A;
+    --amber: #F59E0B;
+    --red: #EF4444;
+    --text: #E8ECF4;
+    --text-soft: #8892A8;
+    --text-muted: #4A5270;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Manrope', sans-serif;
+    --sw: 220px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sw); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; }
+
+  .sb-logo { padding: 20px 18px; border-bottom: 1px solid var(--border); }
+  .sb-logo-text { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; }
+  .sb-logo-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; font-family: var(--mono); }
+
+  .sb-admin { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sb-admin-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); flex-shrink: 0; }
+  .sb-admin-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .sb-admin-role { font-size: 10px; color: var(--text-muted); font-family: var(--mono); margin-top: 1px; }
+
+  .sb-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 1px; overflow-y: auto; }
+  .sb-section { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); padding: 12px 8px 5px; }
+  .sb-link { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 6px; font-size: 13px; color: var(--text-soft); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .sb-link:hover { background: var(--panel); color: var(--text); }
+  .sb-link.active { background: rgba(79,110,247,0.15); color: var(--accent); }
+  .sb-icon { font-size: 14px; width: 16px; text-align: center; }
+  .sb-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+  .sb-badge.red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .sb-badge.amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+  .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+
+  /* MAIN */
+  .main { margin-left: var(--sw); flex: 1; display: flex; flex-direction: column; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); height: 54px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-family: var(--mono); font-size: 13px; color: var(--text-soft); }
+  .topbar-title span { color: var(--text); }
+  .live-indicator { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--green); background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); padding: 4px 10px; border-radius: 4px; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .topbar-time { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+  .icon-btn { width: 32px; height: 32px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.15s; }
+  .icon-btn:hover { border-color: var(--accent); }
+
+  .content { padding: 24px 28px 60px; }
+
+  /* ALERT BAR */
+  .alert-bar { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 22px; font-size: 13px; color: var(--amber); animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+  .alert-bar strong { color: #FCD34D; }
+  .alert-bar-link { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--amber); cursor: pointer; border-bottom: 1px solid rgba(245,158,11,0.4); }
+
+  /* STAT CARDS */
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; position: relative; overflow: hidden; animation: riseIn 0.4s ease both; }
+  @keyframes riseIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+  .stat:nth-child(2){animation-delay:0.05s;}
+  .stat:nth-child(3){animation-delay:0.1s;}
+  .stat:nth-child(4){animation-delay:0.15s;}
+  .stat:nth-child(5){animation-delay:0.2s;}
+
+  .stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+  .stat.blue::after { background: var(--accent); }
+  .stat.green::after { background: var(--green); }
+  .stat.amber::after { background: var(--amber); }
+  .stat.red::after { background: var(--red); }
+  .stat.purple::after { background: #A855F7; }
+
+  .stat-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-val { font-family: var(--mono); font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .stat-delta { font-family: var(--mono); font-size: 11px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+  .stat-delta.flat { color: var(--text-muted); }
+
+  /* GRID LAYOUT */
+  .grid-3-2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .grid-2-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .span-2 { grid-column: span 2; }
+
+  /* PANELS */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; animation: riseIn 0.4s 0.1s ease both; }
+  .panel-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .panel-title { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); letter-spacing: 0.03em; }
+  .panel-link { font-family: var(--mono); font-size: 11px; color: var(--accent); cursor: pointer; }
+  .panel-body { padding: 16px 18px; }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); padding: 0 0 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-soft); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { color: var(--text); }
+
+  .td-main { color: var(--text) !important; font-weight: 600; }
+  .td-mono { font-family: var(--mono); font-size: 12px; }
+
+  .badge { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.04em; }
+  .badge.green { background: rgba(34,197,94,0.12); color: var(--green); }
+  .badge.amber { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .badge.red { background: rgba(239,68,68,0.12); color: var(--red); }
+  .badge.blue { background: rgba(79,110,247,0.12); color: var(--accent); }
+  .badge.gray { background: rgba(74,82,112,0.3); color: var(--text-soft); }
+
+  /* MINI CHART — sparkline bars */
+  .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-bottom: 10px; }
+  .mc-bar { flex: 1; border-radius: 2px 2px 0 0; min-height: 3px; transition: height 0.4s ease; }
+  .mc-bar.accent { background: var(--accent); }
+  .mc-bar.green { background: var(--green); }
+  .mc-bar.dim { background: var(--border); }
+
+  /* VERIFICATION QUEUE MINI */
+  .verify-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .verify-row:last-child { border-bottom: none; }
+  .verify-avatar { width: 32px; height: 32px; border-radius: 6px; background: var(--panel); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); flex-shrink: 0; border: 1px solid var(--border); }
+  .verify-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .verify-meta { font-family: var(--mono); font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .verify-actions { display: flex; gap: 6px; margin-left: auto; }
+  .vbtn { font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 5px; cursor: pointer; border: 1px solid; transition: all 0.15s; }
+  .vbtn.approve { border-color: rgba(34,197,94,0.3); color: var(--green); background: rgba(34,197,94,0.08); }
+  .vbtn.approve:hover { background: rgba(34,197,94,0.2); }
+  .vbtn.reject { border-color: rgba(239,68,68,0.3); color: var(--red); background: rgba(239,68,68,0.08); }
+  .vbtn.reject:hover { background: rgba(239,68,68,0.2); }
+
+  /* MAP HEAT */
+  .geo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .geo-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; background: var(--panel); }
+  .geo-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+  .geo-bar { height: 100%; border-radius: 2px; background: var(--accent); }
+  .geo-label { font-size: 12px; color: var(--text-soft); min-width: 70px; }
+  .geo-count { font-family: var(--mono); font-size: 11px; color: var(--text-muted); min-width: 24px; text-align: right; }
+
+  /* PLATFORM HEALTH */
+  .health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .health-item { background: var(--panel); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--border); }
+  .health-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; }
+  .health-val { font-family: var(--mono); font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .health-val.green { color: var(--green); }
+  .health-val.amber { color: var(--amber); }
+  .health-val.red { color: var(--red); }
+  .health-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; }
+  .health-bar { height: 100%; border-radius: 2px; }
+  .health-bar.green { background: var(--green); }
+  .health-bar.amber { background: var(--amber); }
+  .health-bar.red { background: var(--red); }
+
+  /* RECENT ACTIVITY */
+  .activity-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .activity-row:last-child { border-bottom: none; }
+  .act-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .act-dot.green { background: var(--green); }
+  .act-dot.blue { background: var(--accent); }
+  .act-dot.amber { background: var(--amber); }
+  .act-dot.red { background: var(--red); }
+  .act-text { font-size: 13px; color: var(--text-soft); line-height: 1.5; }
+  .act-text strong { color: var(--text); font-weight: 600; }
+  .act-time { font-family: var(--mono); font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+  @media(max-width:1200px){.stats-row{grid-template-columns:repeat(3,1fr);}.grid-3-2{grid-template-columns:1fr 1fr;}}
+  @media(max-width:900px){.sidebar{transform:translateX(-100%);}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">// AGRICONNECT</div>
+    <div class="sb-logo-sub">Admin Console v1.0</div>
+  </div>
+  <div class="sb-admin">
+    <div class="sb-admin-dot"></div>
+    <div>
+      <div class="sb-admin-name">David Onyango</div>
+      <div class="sb-admin-role">SUPER_ADMIN</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Platform</div>
+    <a class="sb-link active"><span class="sb-icon">⬛</span> Overview</a>
+    <a class="sb-link"><span class="sb-icon">📊</span> Analytics</a>
+    <a class="sb-link"><span class="sb-icon">🗺</span> District Map</a>
+
+    <div class="sb-section">Users</div>
+    <a class="sb-link"><span class="sb-icon">👨‍🌾</span> Farmers <span class="sb-badge amber">7 pending</span></a>
+    <a class="sb-link"><span class="sb-icon">🍽</span> Restaurants</a>
+    <a class="sb-link"><span class="sb-icon">✅</span> Verification Queue <span class="sb-badge red">5</span></a>
+
+    <div class="sb-section">Operations</div>
+    <a class="sb-link"><span class="sb-icon">📦</span> Orders</a>
+    <a class="sb-link"><span class="sb-icon">⚠️</span> Disputes <span class="sb-badge red">2</span></a>
+    <a class="sb-link"><span class="sb-icon">🚚</span> Logistics</a>
+    <a class="sb-link"><span class="sb-icon">💳</span> Escrow & Payments</a>
+
+    <div class="sb-section">Finance</div>
+    <a class="sb-link"><span class="sb-icon">💰</span> Revenue</a>
+    <a class="sb-link"><span class="sb-icon">📑</span> Invoices</a>
+
+    <div class="sb-section">System</div>
+    <a class="sb-link"><span class="sb-icon">⚙️</span> Settings</a>
+    <a class="sb-link"><span class="sb-icon">📋</span> Audit Log</a>
+  </nav>
+  <div class="sb-footer">v1.0.0 · UG · 01 Apr 2026</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">admin / <span>overview</span></div>
+      <div class="live-indicator"><div class="live-dot"></div> LIVE</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-time" id="clock">--:-- --</div>
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">⚙️</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ALERT -->
+    <div class="alert-bar">
+      ⚠️ <strong>5 farmers</strong> awaiting verification · <strong>2 active disputes</strong> require admin review · Escrow balance: UGX 4.2M held
+      <span class="alert-bar-link">Review now →</span>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat blue">
+        <div class="stat-label">Total Farmers</div>
+        <div class="stat-val">284</div>
+        <div class="stat-delta up">+12 this month</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-label">Restaurants</div>
+        <div class="stat-val">91</div>
+        <div class="stat-delta up">+8 this month</div>
+      </div>
+      <div class="stat amber">
+        <div class="stat-label">Orders (Apr)</div>
+        <div class="stat-val">347</div>
+        <div class="stat-delta up">↑ 23% vs Mar</div>
+      </div>
+      <div class="stat purple">
+        <div class="stat-label">GMV (Apr)</div>
+        <div class="stat-val">74.2M</div>
+        <div class="stat-delta up">UGX · ↑ 31%</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-label">Platform Revenue</div>
+        <div class="stat-val">2.83M</div>
+        <div class="stat-delta up">UGX · fees + subs</div>
+      </div>
+    </div>
+
+    <!-- ROW 1 -->
+    <div class="grid-3-2">
+
+      <!-- ORDER VOLUME CHART -->
+      <div class="panel span-2">
+        <div class="panel-head">
+          <div class="panel-title">ORDER_VOLUME // last 12 weeks</div>
+          <div class="panel-link">export CSV</div>
+        </div>
+        <div class="panel-body">
+          <div class="mini-chart" style="height:80px;">
+            <div class="mc-bar dim" style="height:35%;"></div>
+            <div class="mc-bar dim" style="height:45%;"></div>
+            <div class="mc-bar dim" style="height:40%;"></div>
+            <div class="mc-bar dim" style="height:55%;"></div>
+            <div class="mc-bar dim" style="height:50%;"></div>
+            <div class="mc-bar dim" style="height:60%;"></div>
+            <div class="mc-bar dim" style="height:58%;"></div>
+            <div class="mc-bar dim" style="height:70%;"></div>
+            <div class="mc-bar dim" style="height:68%;"></div>
+            <div class="mc-bar accent" style="height:75%;"></div>
+            <div class="mc-bar accent" style="height:88%;"></div>
+            <div class="mc-bar accent" style="height:95%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text-muted);">
+            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr (now)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
+            <div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-bottom:4px;">COMPLETION RATE</div><div style="font-family:var(--mono);font-size:20px;color:var(--green);">96.2%</div></div>
+            <div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-bottom:4px;">AVG ORDER VALUE</div><div style="font-family:var(--mono);font-size:20px;color:var(--accent);">214K UGX</div></div>
+            <div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-bottom:4px;">DISPUTE RATE</div><div style="font-family:var(--mono);font-size:20px;color:var(--amber);">1.4%</div></div>
+            <div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-bottom:4px;">ON-TIME DELIVERY</div><div style="font-family:var(--mono);font-size:20px;color:var(--green);">91.8%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLATFORM HEALTH -->
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">PLATFORM_HEALTH</div></div>
+        <div class="panel-body">
+          <div class="health-grid">
+            <div class="health-item">
+              <div class="health-label">Escrow Success</div>
+              <div class="health-val green">98.6%</div>
+              <div class="health-bar-wrap"><div class="health-bar green" style="width:98.6%;"></div></div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Farmer Uptime</div>
+              <div class="health-val green">94.1%</div>
+              <div class="health-bar-wrap"><div class="health-bar green" style="width:94%;"></div></div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Dispute Rate</div>
+              <div class="health-val amber">1.4%</div>
+              <div class="health-bar-wrap"><div class="health-bar amber" style="width:14%;"></div></div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Verification Lag</div>
+              <div class="health-val amber">38hrs</div>
+              <div class="health-bar-wrap"><div class="health-bar amber" style="width:55%;"></div></div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Payment Success</div>
+              <div class="health-val green">99.1%</div>
+              <div class="health-bar-wrap"><div class="health-bar green" style="width:99%;"></div></div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Churn (30d)</div>
+              <div class="health-val green">2.3%</div>
+              <div class="health-bar-wrap"><div class="health-bar green" style="width:23%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="grid-2-1">
+
+      <!-- RECENT ORDERS -->
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">RECENT_ORDERS</div><span class="panel-link">view all</span></div>
+        <div class="panel-body" style="padding:0 18px;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Order ID</th><th>Restaurant</th><th>Farmer</th><th>Value</th><th>Status</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="td-mono td-main">#AGC-847</td><td>Kati Kati</td><td>E. Ssekandi</td><td class="td-mono">221K</td><td><span class="badge blue">CONFIRMED</span></td></tr>
+              <tr><td class="td-mono td-main">#AGC-846</td><td>Serena Hotel</td><td>B. Moses</td><td class="td-mono">340K</td><td><span class="badge amber">TRANSIT</span></td></tr>
+              <tr><td class="td-mono td-main">#AGC-845</td><td>Café Javas</td><td>A. Nancy</td><td class="td-mono">65K</td><td><span class="badge green">DELIVERED</span></td></tr>
+              <tr><td class="td-mono td-main">#AGC-844</td><td>Mamba Point</td><td>N. Ketty</td><td class="td-mono">480K</td><td><span class="badge green">DELIVERED</span></td></tr>
+              <tr><td class="td-mono td-main">#AGC-843</td><td>The Lawns</td><td>O. James</td><td class="td-mono">112K</td><td><span class="badge red">DISPUTE</span></td></tr>
+              <tr><td class="td-mono td-main">#AGC-842</td><td>Fang Fang</td><td>A. Christine</td><td class="td-mono">180K</td><td><span class="badge green">DELIVERED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT PANELS -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- VERIFICATION QUEUE MINI -->
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">VERIFY_QUEUE <span style="color:var(--red);margin-left:6px;">● 5</span></div><span class="panel-link">open queue</span></div>
+          <div class="panel-body" style="padding:8px 18px;">
+            <div class="verify-row">
+              <div class="verify-avatar">RK</div>
+              <div><div class="verify-name">Rugaba Kenneth</div><div class="verify-meta">Mbarara · Dairy</div></div>
+              <div class="verify-actions"><button class="vbtn approve">✓ Approve</button><button class="vbtn reject">✗ Reject</button></div>
+            </div>
+            <div class="verify-row">
+              <div class="verify-avatar">AM</div>
+              <div><div class="verify-name">Atim Margaret</div><div class="verify-meta">Gulu · Mixed</div></div>
+              <div class="verify-actions"><button class="vbtn approve">✓ Approve</button><button class="vbtn reject">✗ Reject</button></div>
+            </div>
+            <div class="verify-row">
+              <div class="verify-avatar">OK</div>
+              <div><div class="verify-name">Opio Kenneth</div><div class="verify-meta">Lira · Fruits</div></div>
+              <div class="verify-actions"><button class="vbtn approve">✓ Approve</button><button class="vbtn reject">✗ Reject</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GEO DISTRIBUTION -->
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">FARMER_GEO</div></div>
+          <div class="panel-body">
+            <div class="geo-grid">
+              <div class="geo-row"><span class="geo-label">Wakiso</span><div class="geo-bar-wrap"><div class="geo-bar" style="width:85%;"></div></div><span class="geo-count">68</span></div>
+              <div class="geo-row"><span class="geo-label">Kayunga</span><div class="geo-bar-wrap"><div class="geo-bar" style="width:60%;"></div></div><span class="geo-count">48</span></div>
+              <div class="geo-row"><span class="geo-label">Mbarara</span><div class="geo-bar-wrap"><div class="geo-bar" style="width:50%;"></div></div><span class="geo-count">40</span></div>
+              <div class="geo-row"><span class="geo-label">Luwero</span><div class="geo-bar-wrap"><div class="geo-bar" style="width:40%;"></div></div><span class="geo-count">32</span></div>
+              <div class="geo-row"><span class="geo-label">Mukono</span><div class="geo-bar-wrap"><div class="geo-bar" style="width:30%;"></div></div><span class="geo-count">24</span></div>
+              <div class="geo-row"><span class="geo-label">Other</span><div class="geo-bar-wrap"><div class="geo-bar" style="width:90%;background:var(--border-light);"></div></div><span class="geo-count">72</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">ACTIVITY_LOG // real-time</div><span class="panel-link">audit trail</span></div>
+      <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px;">
+        <div>
+          <div class="activity-row"><div class="act-dot green"></div><div><div class="act-text"><strong>Kati Kati Restaurant</strong> placed order #AGC-847 — UGX 221,000</div><div class="act-time">2 min ago</div></div></div>
+          <div class="activity-row"><div class="act-dot blue"></div><div><div class="act-text"><strong>Rugaba Kenneth</strong> submitted farm registration (Mbarara, Dairy)</div><div class="act-time">14 min ago</div></div></div>
+          <div class="activity-row"><div class="act-dot amber"></div><div><div class="act-text">Dispute #D-019 opened — <strong>The Lawns</strong> vs <strong>Otim James</strong> (quality issue)</div><div class="act-time">38 min ago</div></div></div>
+          <div class="activity-row"><div class="act-dot green"></div><div><div class="act-text">Escrow released: UGX 340,000 → <strong>Byamukama Moses</strong> (order #AGC-846)</div><div class="act-time">1 hr ago</div></div></div>
+        </div>
+        <div>
+          <div class="activity-row"><div class="act-dot green"></div><div><div class="act-text"><strong>Café Javas</strong> confirmed delivery #AGC-845 — rated farmer 5★</div><div class="act-time">2 hr ago</div></div></div>
+          <div class="activity-row"><div class="act-dot blue"></div><div><div class="act-text"><strong>Atim Margaret</strong> submitted farm registration (Gulu, Mixed produce)</div><div class="act-time">3 hr ago</div></div></div>
+          <div class="activity-row"><div class="act-dot red"></div><div><div class="act-text">MTN MoMo payment retry failed — order #AGC-838. Manual review needed.</div><div class="act-time">4 hr ago</div></div></div>
+          <div class="activity-row"><div class="act-dot green"></div><div><div class="act-text"><strong>Serena Hotel</strong> upgraded to Premium Plan — UGX 360,000 collected</div><div class="act-time">5 hr ago</div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function updateClock(){
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('en-UG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  setInterval(updateClock,1000); updateClock();
+</script>
+</body>
+</html>

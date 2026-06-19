@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — Browse Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0F1A14;
+    --deep: #162010;
+    --panel: #1C2B1F;
+    --card: #F7FAF8;
+    --fresh: #2ECC71;
+    --fresh-dim: #27AE60;
+    --gold: #F0C040;
+    --text: #0F1A14;
+    --text-soft: #607060;
+    --text-muted: #9AAA9A;
+    --border: #E2EDE4;
+    --white: #FFFFFF;
+    --sidebar-w: 260px;
+    --red: #E74C3C;
+    --blue: #3498DB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: #F2F7F3;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--night);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    padding: 26px 24px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--fresh); }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; }
+
+  .sidebar-user {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .user-avatar {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2ECC71, #1A8A4A);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 14px; color: #fff;
+    flex-shrink: 0;
+  }
+
+  .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+  .sidebar-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+
+  .nav-group-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.22); padding: 12px 10px 5px; margin-top: 6px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 14px; color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: rgba(46,204,113,0.14); color: var(--fresh); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-chip { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+  .nav-chip.green { background: var(--fresh-dim); }
+
+  .sidebar-bottom {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .plan-badge {
+    background: rgba(240,192,64,0.1);
+    border: 1px solid rgba(240,192,64,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--gold);
+  }
+
+  .plan-badge strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  /* ── MAIN ── */
+  .main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--white);
+    height: 62px;
+    padding: 0 32px;
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 40;
+  }
+
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--night);
+  }
+
+  .topbar-spacer { flex: 1; }
+
+  .cart-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 18px;
+    background: var(--night);
+    color: #fff;
+    border: none; border-radius: 8px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    position: relative;
+  }
+
+  .cart-btn:hover { background: var(--panel); transform: translateY(-1px); }
+
+  .cart-count {
+    background: var(--fresh);
+    color: var(--night);
+    font-size: 11px; font-weight: 800;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .notif-btn {
+    width: 38px; height: 38px;
+    background: #F2F7F3;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer;
+    position: relative;
+  }
+
+  .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); border: 2px solid #fff; }
+
+  /* HERO SEARCH */
+  .hero-search {
+    background: var(--night);
+    padding: 32px 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-search::after {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(46,204,113,0.12), transparent 70%);
+  }
+
+  .hero-search-inner {
+    max-width: 680px;
+    position: relative; z-index: 2;
+  }
+
+  .hero-search h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px; font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .hero-search h2 span { color: var(--fresh); }
+
+  .hero-search p { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+
+  .search-bar {
+    display: flex;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    margin-bottom: -1px;
+  }
+
+  .search-bar input {
+    flex: 1;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 15px;
+    padding: 14px 18px;
+    border: none; outline: none;
+    color: var(--text);
+  }
+
+  .search-bar input::placeholder { color: #B0C0B0; }
+
+  .search-divider { width: 1px; background: var(--border); margin: 10px 0; }
+
+  .location-select {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 14px;
+    padding: 14px 16px;
+    border: none; outline: none;
+    background: transparent;
+    color: var(--text-soft);
+    cursor: pointer;
+    min-width: 150px;
+  }
+
+  .search-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    padding: 14px 24px;
+    background: var(--fresh);
+    color: var(--night);
+    border: none; cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .search-btn:hover { background: var(--fresh-dim); color: #fff; }
+
+  /* CATEGORY STRIP */
+  .cat-strip {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  .cat-strip::-webkit-scrollbar { display: none; }
+
+  .cat-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-soft);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .cat-pill:hover { color: var(--text); border-bottom-color: var(--border); }
+  .cat-pill.active { color: var(--night); border-bottom-color: var(--fresh); font-weight: 600; }
+  .cat-pill .cat-count { background: #EEF4EE; color: var(--text-soft); font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+  .cat-pill.active .cat-count { background: rgba(46,204,113,0.15); color: var(--fresh-dim); }
+
+  /* PAGE BODY */
+  .page-body {
+    display: flex;
+    padding: 24px 32px 60px;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  /* FILTER SIDEBAR */
+  .filter-panel {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 86px;
+  }
+
+  .filter-box {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .filter-box-header {
+    padding: 14px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--night);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .filter-clear { font-family: 'Instrument Sans', sans-serif; font-size: 12px; color: var(--fresh-dim); cursor: pointer; font-weight: 500; }
+
+  .filter-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .filter-check {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--text-soft); cursor: pointer;
+  }
+
+  .filter-check input { display: none; }
+
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid #C8D8C8;
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    transition: all 0.2s;
+  }
+
+  .filter-check.checked .check-box { background: var(--fresh); border-color: var(--fresh); color: #fff; }
+  .filter-check.checked { color: var(--text); font-weight: 500; }
+
+  .filter-count { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+
+  .range-row { display: flex; gap: 8px; align-items: center; }
+  .range-input { flex: 1; font-family: 'Instrument Sans', sans-serif; font-size: 13px; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 6px; outline: none; color: var(--text); background: #F8FCF9; }
+  .range-input:focus { border-color: var(--fresh); }
+  .range-sep { font-size: 12px; color: var(--text-muted); }
+
+  .rating-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .rating-opt { padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; color: var(--text-soft); }
+  .rating-opt:hover, .rating-opt.active { border-color: var(--fresh); color: var(--fresh-dim); background: rgba(46,204,113,0.06); }
+
+  /* RESULTS AREA */
+  .results-area { flex: 1; min-width: 0; }
+
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+  }
+
+  .results-count { font-size: 14px; color: var(--text-soft); }
+  .results-count strong { color: var(--text); font-weight: 600; }
+
+  .results-right { display: flex; gap: 10px; align-items: center; }
+
+  .view-toggle { display: flex; background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .view-btn { padding: 7px 12px; border: none; background: transparent; cursor: pointer; font-size: 14px; color: var(--text-soft); transition: all 0.2s; }
+  .view-btn.active { background: var(--night); color: #fff; }
+
+  .sort-sel { font-family: 'Instrument Sans', sans-serif; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); outline: none; cursor: pointer; }
+
+  /* FARMER CARDS */
+  .farmers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+  .farmer-card {
+    background: var(--white);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s;
+    animation: riseIn 0.4s ease both;
+  }
+
+  .farmer-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(15,26,20,0.1); border-color: #C8DCC8; }
+
+  @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .farmer-card:nth-child(2) { animation-delay: 0.06s; }
+  .farmer-card:nth-child(3) { animation-delay: 0.12s; }
+  .farmer-card:nth-child(4) { animation-delay: 0.18s; }
+  .farmer-card:nth-child(5) { animation-delay: 0.24s; }
+  .farmer-card:nth-child(6) { animation-delay: 0.30s; }
+
+  .card-header {
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid #F0F4F0;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+
+  .card-avatar {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2ECC71, #1A6B38);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 800; color: #fff;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .verified-dot {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 16px; height: 16px;
+    background: var(--fresh);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: var(--night);
+  }
+
+  .card-info { flex: 1; min-width: 0; }
+  .card-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--night); margin-bottom: 2px; }
+  .card-location { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+
+  .card-rating {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--text-soft);
+  }
+
+  .stars { color: var(--gold); font-size: 11px; letter-spacing: 0.5px; }
+  .rating-num { font-weight: 600; color: var(--text); }
+
+  .card-body { padding: 14px 18px; }
+
+  .produce-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+  .produce-tag {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 500;
+    background: #F0F7F2; color: var(--fresh-dim);
+    padding: 4px 10px; border-radius: 6px;
+    border: 1px solid #D8EDD8;
+  }
+
+  .card-stats { display: flex; gap: 0; border-top: 1px solid #F0F4F0; margin: 0 -18px; padding: 0 18px; }
+  .card-stat { flex: 1; padding: 10px 0; text-align: center; border-right: 1px solid #F0F4F0; }
+  .card-stat:last-child { border-right: none; }
+  .cs-val { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--night); }
+  .cs-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+
+  .card-footer { padding: 12px 18px; display: flex; gap: 8px; }
+
+  .btn-view {
+    flex: 1;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    padding: 9px;
+    background: var(--night);
+    color: #fff;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-view:hover { background: var(--panel); }
+
+  .btn-save {
+    width: 36px; height: 36px;
+    background: #F2F7F3;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-save:hover { background: rgba(240,192,64,0.15); border-color: var(--gold); }
+  .btn-save.saved { background: rgba(240,192,64,0.15); border-color: var(--gold); }
+
+  /* FEATURED BANNER */
+  .featured-banner {
+    background: linear-gradient(135deg, var(--night), #1A3A22);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid rgba(46,204,113,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-banner::before {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(46,204,113,0.15), transparent 70%);
+  }
+
+  .featured-icon { font-size: 40px; flex-shrink: 0; }
+
+  .featured-text h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .featured-text p { font-size: 13px; color: rgba(255,255,255,0.55); }
+
+  .featured-cta {
+    margin-left: auto;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    padding: 9px 18px;
+    background: var(--fresh);
+    color: var(--night);
+    border: none; border-radius: 8px; cursor: pointer;
+    white-space: nowrap; flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .featured-cta:hover { background: var(--fresh-dim); color: #fff; }
+
+  /* LOAD MORE */
+  .load-more {
+    text-align: center;
+    margin-top: 28px;
+  }
+
+  .btn-load {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 12px 32px;
+    background: #fff;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-load:hover { border-color: var(--fresh); color: var(--fresh-dim); }
+
+  @media (max-width: 1100px) {
+    .filter-panel { display: none; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main-wrap { margin-left: 0; }
+    .page-body { padding: 16px; }
+    .hero-search { padding: 20px 16px 0; }
+    .topbar { padding: 0 16px; }
+    .cat-strip { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo">Agri<span>Connect</span></div>
+    <div class="logo-sub">Restaurant Portal</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">KK</div>
+    <div>
+      <div class="user-name">Kati Kati Restaurant</div>
+      <div class="user-role">Procurement Manager</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Procurement</div>
+    <a class="nav-item active"><span class="nav-icon">🛒</span> Browse Marketplace</a>
+    <a class="nav-item"><span class="nav-icon">❤️</span> Saved Farmers</a>
+    <a class="nav-item"><span class="nav-icon">📦</span> My Orders <span class="nav-chip">2</span></a>
+    <a class="nav-item"><span class="nav-icon">🔄</span> Recurring Orders</a>
+
+    <div class="nav-group-label">Finance</div>
+    <a class="nav-item"><span class="nav-icon">💳</span> Payments & Escrow</a>
+    <a class="nav-item"><span class="nav-icon">📊</span> Spend Analytics</a>
+
+    <div class="nav-group-label">Account</div>
+    <a class="nav-item"><span class="nav-icon">🍽️</span> Restaurant Profile</a>
+    <a class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="plan-badge">
+      <strong>⭐ Premium Plan</strong>
+      Priority matching · Unlimited orders
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title">Marketplace</div>
+    <div class="topbar-spacer"></div>
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <button class="cart-btn">🛒 Cart <span class="cart-count">3</span></button>
+  </div>
+
+  <!-- HERO SEARCH -->
+  <div class="hero-search">
+    <div class="hero-search-inner">
+      <h2>Find <span>verified farmers</span> near Kampala</h2>
+      <p>Direct produce, transparent pricing, escrow-protected payments.</p>
+      <div class="search-bar">
+        <input type="text" placeholder="Search produce, farm name, or district…">
+        <div class="search-divider"></div>
+        <select class="location-select">
+          <option>📍 All Uganda</option>
+          <option selected>📍 Kampala / Wakiso</option>
+          <option>📍 Mbarara</option>
+          <option>📍 Kayunga</option>
+          <option>📍 Luwero</option>
+          <option>📍 Mukono</option>
+        </select>
+        <button class="search-btn">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY STRIP -->
+  <div class="cat-strip">
+    <div class="cat-pill active">🌿 All Produce <span class="cat-count">48</span></div>
+    <div class="cat-pill">🍍 Fruits <span class="cat-count">18</span></div>
+    <div class="cat-pill">🥬 Vegetables <span class="cat-count">14</span></div>
+    <div class="cat-pill">🥩 Meat <span class="cat-count">7</span></div>
+    <div class="cat-pill">🥛 Dairy <span class="cat-count">6</span></div>
+    <div class="cat-pill">🌾 Grains <span class="cat-count">3</span></div>
+    <div class="cat-pill">🐓 Poultry & Eggs <span class="cat-count">5</span></div>
+  </div>
+
+  <!-- PAGE BODY -->
+  <div class="page-body">
+
+    <!-- FILTER PANEL -->
+    <div class="filter-panel">
+
+      <div class="filter-box">
+        <div class="filter-box-header">Filters <span class="filter-clear">Clear all</span></div>
+        <div class="filter-body">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:4px;">Verification</div>
+          <label class="filter-check checked" onclick="this.classList.toggle('checked')">
+            <div class="check-box">✓</div> Verified only <span class="filter-count">32</span>
+          </label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')">
+            <div class="check-box"></div> All farmers <span class="filter-count">48</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-box">
+        <div class="filter-box-header">District</div>
+        <div class="filter-body">
+          <label class="filter-check checked" onclick="this.classList.toggle('checked')"><div class="check-box">✓</div> Wakiso <span class="filter-count">14</span></label>
+          <label class="filter-check checked" onclick="this.classList.toggle('checked')"><div class="check-box">✓</div> Kayunga <span class="filter-count">9</span></label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Mbarara <span class="filter-count">8</span></label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Luwero <span class="filter-count">7</span></label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Mukono <span class="filter-count">6</span></label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Nakaseke <span class="filter-count">4</span></label>
+        </div>
+      </div>
+
+      <div class="filter-box">
+        <div class="filter-box-header">Price Range (UGX/kg)</div>
+        <div class="filter-body">
+          <div class="range-row">
+            <input class="range-input" type="number" placeholder="Min" value="2000">
+            <span class="range-sep">–</span>
+            <input class="range-input" type="number" placeholder="Max" value="15000">
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-box">
+        <div class="filter-box-header">Minimum Rating</div>
+        <div class="filter-body">
+          <div class="rating-row">
+            <div class="rating-opt">Any</div>
+            <div class="rating-opt">3+⭐</div>
+            <div class="rating-opt active">4+⭐</div>
+            <div class="rating-opt">4.5+⭐</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-box">
+        <div class="filter-box-header">Delivery</div>
+        <div class="filter-body">
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Self-delivers</label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Pickup available</label>
+          <label class="filter-check" onclick="this.classList.toggle('checked')"><div class="check-box"></div> Within 50km</label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-area">
+
+      <!-- FEATURED -->
+      <div class="featured-banner">
+        <div class="featured-icon">🌱</div>
+        <div class="featured-text">
+          <h3>Harvest season: Pineapples & Mangoes now available</h3>
+          <p>14 verified farms in Kayunga and Wakiso have fresh stock ready for immediate orders</p>
+        </div>
+        <button class="featured-cta">View seasonal produce →</button>
+      </div>
+
+      <div class="results-header">
+        <div class="results-count">Showing <strong>48 farmers</strong> matching your filters</div>
+        <div class="results-right">
+          <div class="view-toggle">
+            <button class="view-btn active">⊞</button>
+            <button class="view-btn">☰</button>
+          </div>
+          <select class="sort-sel">
+            <option>Sort: Best match</option>
+            <option>Sort: Highest rated</option>
+            <option>Sort: Closest to you</option>
+            <option>Sort: Most orders</option>
+            <option>Sort: Price low–high</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="farmers-grid">
+
+        <!-- CARD 1 -->
+        <div class="farmer-card" onclick="location.href='restaurant-farmer-profile.html'">
+          <div class="card-header">
+            <div class="card-avatar">ES <div class="verified-dot">✓</div></div>
+            <div class="card-info">
+              <div class="card-name">Emmanuel Ssekandi</div>
+              <div class="card-location">📍 Kayunga District · 42km away</div>
+              <div class="card-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-num">4.9</span>
+                <span>(28 reviews)</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="produce-tags">
+              <div class="produce-tag">🍍 Pineapples</div>
+              <div class="produce-tag">🥭 Mangoes</div>
+              <div class="produce-tag">🍉 Watermelon</div>
+            </div>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat"><div class="cs-val">UGX 5K</div><div class="cs-label">From / kg</div></div>
+            <div class="card-stat"><div class="cs-val">320kg</div><div class="cs-label">In stock</div></div>
+            <div class="card-stat"><div class="cs-val">94%</div><div class="cs-label">On time</div></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-view">View Farm →</button>
+            <button class="btn-save saved" title="Saved">★</button>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="farmer-card">
+          <div class="card-header">
+            <div class="card-avatar" style="background:linear-gradient(135deg,#E67E22,#8B4513);">AN <div class="verified-dot">✓</div></div>
+            <div class="card-info">
+              <div class="card-name">Akello Nancy</div>
+              <div class="card-location">📍 Wakiso District · 18km away</div>
+              <div class="card-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-num">4.8</span>
+                <span>(19 reviews)</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="produce-tags">
+              <div class="produce-tag">🥬 Kale</div>
+              <div class="produce-tag">🍅 Tomatoes</div>
+              <div class="produce-tag">🧅 Onions</div>
+            </div>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat"><div class="cs-val">UGX 2.5K</div><div class="cs-label">From / kg</div></div>
+            <div class="card-stat"><div class="cs-val">180kg</div><div class="cs-label">In stock</div></div>
+            <div class="card-stat"><div class="cs-val">98%</div><div class="cs-label">On time</div></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-view">View Farm →</button>
+            <button class="btn-save" title="Save">☆</button>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="farmer-card">
+          <div class="card-header">
+            <div class="card-avatar" style="background:linear-gradient(135deg,#8E44AD,#4A235A);">BM <div class="verified-dot">✓</div></div>
+            <div class="card-info">
+              <div class="card-name">Byamukama Moses</div>
+              <div class="card-location">📍 Mbarara District · 280km</div>
+              <div class="card-rating">
+                <span class="stars">★★★★☆</span>
+                <span class="rating-num">4.6</span>
+                <span>(41 reviews)</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="produce-tags">
+              <div class="produce-tag">🥛 Fresh Milk</div>
+              <div class="produce-tag">🧈 Ghee</div>
+              <div class="produce-tag">🍶 Yoghurt</div>
+            </div>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat"><div class="cs-val">UGX 1.2K</div><div class="cs-label">From / L</div></div>
+            <div class="card-stat"><div class="cs-val">500L</div><div class="cs-label">In stock</div></div>
+            <div class="card-stat"><div class="cs-val">91%</div><div class="cs-label">On time</div></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-view">View Farm →</button>
+            <button class="btn-save" title="Save">☆</button>
+          </div>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="farmer-card">
+          <div class="card-header">
+            <div class="card-avatar" style="background:linear-gradient(135deg,#C0392B,#7B241C);">NK <div class="verified-dot">✓</div></div>
+            <div class="card-info">
+              <div class="card-name">Nakato Ketty</div>
+              <div class="card-location">📍 Luwero District · 68km</div>
+              <div class="card-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-num">4.7</span>
+                <span>(15 reviews)</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="produce-tags">
+              <div class="produce-tag">🥩 Goat Meat</div>
+              <div class="produce-tag">🥩 Beef</div>
+            </div>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat"><div class="cs-val">UGX 12K</div><div class="cs-label">From / kg</div></div>
+            <div class="card-stat"><div class="cs-val">120kg</div><div class="cs-label">In stock</div></div>
+            <div class="card-stat"><div class="cs-val">89%</div><div class="cs-label">On time</div></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-view">View Farm →</button>
+            <button class="btn-save" title="Save">☆</button>
+          </div>
+        </div>
+
+        <!-- CARD 5 -->
+        <div class="farmer-card">
+          <div class="card-header">
+            <div class="card-avatar" style="background:linear-gradient(135deg,#1A8A8A,#0A4A4A);">OJ</div>
+            <div class="card-info">
+              <div class="card-name">Otim James</div>
+              <div class="card-location">📍 Mukono District · 35km</div>
+              <div class="card-rating">
+                <span class="stars">★★★★☆</span>
+                <span class="rating-num">4.3</span>
+                <span>(8 reviews)</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="produce-tags">
+              <div class="produce-tag">🍍 Pineapples</div>
+              <div class="produce-tag">🍋 Passion Fruit</div>
+            </div>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat"><div class="cs-val">UGX 4.5K</div><div class="cs-label">From / kg</div></div>
+            <div class="card-stat"><div class="cs-val">90kg</div><div class="cs-label">In stock</div></div>
+            <div class="card-stat"><div class="cs-val">85%</div><div class="cs-label">On time</div></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-view">View Farm →</button>
+            <button class="btn-save" title="Save">☆</button>
+          </div>
+        </div>
+
+        <!-- CARD 6 -->
+        <div class="farmer-card">
+          <div class="card-header">
+            <div class="card-avatar" style="background:linear-gradient(135deg,#27AE60,#0A4A20);">AK <div class="verified-dot">✓</div></div>
+            <div class="card-info">
+              <div class="card-name">Apio Christine</div>
+              <div class="card-location">📍 Wakiso District · 22km</div>
+              <div class="card-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-num">4.9</span>
+                <span>(33 reviews)</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="produce-tags">
+              <div class="produce-tag">🐓 Chicken</div>
+              <div class="produce-tag">🥚 Eggs</div>
+            </div>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat"><div class="cs-val">UGX 18K</div><div class="cs-label">Per bird</div></div>
+            <div class="card-stat"><div class="cs-val">60 birds</div><div class="cs-label">Available</div></div>
+            <div class="card-stat"><div class="cs-val">97%</div><div class="cs-label">On time</div></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-view">View Farm →</button>
+            <button class="btn-save saved" title="Saved">★</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="load-more">
+        <button class="btn-load">Load more farmers (42 remaining)</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.addEventListener('click', function() {
+      document.querySelectorAll('.cat-pill').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.view-btn').forEach(b => {
+    b.addEventListener('click', function() {
+      document.querySelectorAll('.view-btn').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.rating-opt').forEach(o => {
+    o.addEventListener('click', function() {
+      document.querySelectorAll('.rating-opt').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.btn-save').forEach(b => {
+    b.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('saved');
+      this.textContent = this.classList.contains('saved') ? '★' : '☆';
+    });
+  });
+</script>
+</body>
+</html>

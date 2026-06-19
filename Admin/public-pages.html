@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — How It Works · Pricing · About</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0A0F0A;--leaf:#16A34A;--leaf-bright:#22C55E;
+    --cream:#F7F5EF;--warm:#EDE8DC;--gold:#D4A843;
+    --text:#1A2414;--text-soft:#5A7060;--border:#D8E8D0;--white:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(247,245,239,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+  .nav-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-0.02em;}
+  .nav-logo span{color:var(--leaf);}
+  .nav-page-tabs{display:flex;gap:0;height:100%;align-items:flex-end;}
+  .ntab{font-size:14px;font-weight:500;padding:0 20px;height:100%;display:flex;align-items:center;color:var(--text-soft);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+  .ntab:hover{color:var(--ink);}
+  .ntab.active{color:var(--leaf);border-bottom-color:var(--leaf);}
+  .nav-cta{font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;padding:8px 20px;background:var(--ink);color:var(--white);border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;}
+  .nav-cta:hover{background:var(--leaf);}
+
+  /* PAGE WRAPPERS */
+  .page{display:none;padding-top:64px;}
+  .page.show{display:block;}
+
+  /* ── HOW IT WORKS ── */
+  .hiw-hero{background:var(--ink);padding:80px 48px;text-align:center;position:relative;overflow:hidden;}
+  .hiw-hero::after{content:'';position:absolute;bottom:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,0.12),transparent 70%);pointer-events:none;}
+  .hiw-hero h1{font-family:'Fraunces',serif;font-size:clamp(40px,6vw,80px);font-weight:900;color:var(--white);letter-spacing:-0.03em;margin-bottom:16px;position:relative;z-index:1;}
+  .hiw-hero h1 span{color:var(--leaf-bright);}
+  .hiw-hero p{font-size:18px;color:rgba(255,255,255,0.55);max-width:520px;margin:0 auto;position:relative;z-index:1;}
+
+  /* STEP TIMELINE */
+  .timeline-section{max-width:900px;margin:0 auto;padding:80px 48px;}
+
+  .tl-step{display:grid;grid-template-columns:80px 1fr;gap:32px;margin-bottom:56px;animation:fadeUp 0.5s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .tl-step:nth-child(2){animation-delay:0.08s;}
+  .tl-step:nth-child(3){animation-delay:0.16s;}
+  .tl-step:nth-child(4){animation-delay:0.24s;}
+
+  .tl-left{display:flex;flex-direction:column;align-items:center;}
+  .tl-num{width:56px;height:56px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--leaf-bright);flex-shrink:0;}
+  .tl-line{width:2px;flex:1;background:var(--border);margin-top:12px;}
+  .tl-step:last-child .tl-line{display:none;}
+
+  .tl-content{padding-top:12px;}
+  .tl-icon{font-size:36px;margin-bottom:12px;}
+  .tl-title{font-family:'Fraunces',serif;font-size:28px;font-weight:900;letter-spacing:-0.01em;margin-bottom:10px;}
+  .tl-desc{font-size:16px;color:var(--text-soft);line-height:1.75;margin-bottom:16px;}
+  .tl-note{background:var(--warm);border-radius:10px;padding:14px 18px;font-size:14px;color:var(--text-soft);border-left:3px solid var(--leaf);}
+  .tl-note strong{color:var(--text);}
+
+  .who-section{background:var(--warm);padding:64px 48px;}
+  .who-section h2{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,48px);font-weight:900;text-align:center;margin-bottom:48px;letter-spacing:-0.02em;}
+  .who-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px;margin:0 auto;}
+  .who-card{background:var(--white);border-radius:20px;padding:36px;border:1px solid var(--border);}
+  .who-card h3{font-family:'Fraunces',serif;font-size:24px;font-weight:900;margin-bottom:8px;}
+  .who-card p{font-size:15px;color:var(--text-soft);line-height:1.7;margin-bottom:20px;}
+  .who-list{display:flex;flex-direction:column;gap:8px;}
+  .who-item{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-soft);}
+  .who-check{width:18px;height:18px;border-radius:50%;background:var(--leaf);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0;}
+  .who-cta{margin-top:24px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;padding:11px 22px;background:var(--ink);color:#fff;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;display:inline-block;}
+  .who-cta:hover{background:var(--leaf);}
+
+  /* ── PRICING ── */
+  .price-hero{background:var(--ink);padding:80px 48px;text-align:center;}
+  .price-hero h1{font-family:'Fraunces',serif;font-size:clamp(40px,6vw,80px);font-weight:900;color:var(--white);letter-spacing:-0.03em;margin-bottom:16px;}
+  .price-hero h1 span{color:var(--gold);}
+  .price-hero p{font-size:18px;color:rgba(255,255,255,0.5);max-width:520px;margin:0 auto;}
+
+  .pricing-section{max-width:1100px;margin:0 auto;padding:80px 48px;}
+  .pricing-label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-soft);text-align:center;margin-bottom:14px;}
+  .pricing-title{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,44px);font-weight:900;text-align:center;margin-bottom:48px;letter-spacing:-0.02em;}
+
+  /* FARMER PLANS */
+  .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:64px;}
+
+  .plan-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:36px;position:relative;overflow:hidden;transition:all 0.25s;}
+  .plan-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(10,15,10,0.1);}
+  .plan-card.featured{border-color:var(--leaf);background:var(--ink);color:var(--white);}
+  .plan-card.featured::before{content:'Most Popular';position:absolute;top:20px;right:-28px;background:var(--leaf-bright);color:var(--ink);font-size:11px;font-weight:700;padding:4px 36px;transform:rotate(45deg);letter-spacing:0.06em;}
+
+  .plan-name{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
+  .plan-card.featured .plan-name{color:var(--leaf-bright);}
+  .plan-card:not(.featured) .plan-name{color:var(--text-soft);}
+
+  .plan-price{font-family:'Fraunces',serif;font-size:48px;font-weight:900;letter-spacing:-0.02em;margin-bottom:4px;}
+  .plan-card.featured .plan-price{color:var(--white);}
+  .plan-card:not(.featured) .plan-price{color:var(--ink);}
+
+  .plan-period{font-size:14px;margin-bottom:20px;}
+  .plan-card.featured .plan-period{color:rgba(255,255,255,0.5);}
+  .plan-card:not(.featured) .plan-period{color:var(--text-soft);}
+
+  .plan-divider{height:1px;margin-bottom:20px;}
+  .plan-card.featured .plan-divider{background:rgba(255,255,255,0.1);}
+  .plan-card:not(.featured) .plan-divider{background:var(--border);}
+
+  .plan-features{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+  .pf-item{display:flex;align-items:center;gap:10px;font-size:14px;}
+  .plan-card.featured .pf-item{color:rgba(255,255,255,0.8);}
+  .plan-card:not(.featured) .pf-item{color:var(--text-soft);}
+  .pf-check{font-size:13px;}
+  .pf-item.disabled{opacity:0.35;}
+
+  .plan-btn{font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;padding:13px;width:100%;border:none;border-radius:10px;cursor:pointer;transition:all 0.2s;}
+  .plan-card.featured .plan-btn{background:var(--leaf-bright);color:var(--ink);}
+  .plan-card.featured .plan-btn:hover{background:#16A34A;color:#fff;transform:translateY(-1px);}
+  .plan-card:not(.featured) .plan-btn{background:var(--ink);color:#fff;}
+  .plan-card:not(.featured) .plan-btn:hover{background:var(--leaf);}
+
+  /* RESTAURANT PLAN */
+  .restaurant-pricing{background:var(--warm);border-radius:24px;padding:48px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;margin-bottom:64px;}
+  .rp-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--leaf);margin-bottom:12px;}
+  .rp-title{font-family:'Fraunces',serif;font-size:36px;font-weight:900;letter-spacing:-0.02em;margin-bottom:12px;}
+  .rp-desc{font-size:15px;color:var(--text-soft);line-height:1.7;margin-bottom:24px;}
+  .rp-btn{font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;padding:13px 28px;background:var(--ink);color:#fff;border:none;border-radius:10px;cursor:pointer;transition:all 0.2s;}
+  .rp-btn:hover{background:var(--leaf);}
+  .rp-features{display:flex;flex-direction:column;gap:12px;}
+  .rpf-item{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--text-soft);}
+  .rpf-icon{width:36px;height:36px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid var(--border);}
+
+  /* FAQ */
+  .faq-section{max-width:700px;margin:0 auto;padding:0 48px 80px;}
+  .faq-section h2{font-family:'Fraunces',serif;font-size:clamp(24px,3vw,36px);font-weight:900;margin-bottom:32px;text-align:center;}
+  .faq-item{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer;}
+  .faq-q{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:600;color:var(--ink);}
+  .faq-icon{font-size:20px;color:var(--text-soft);transition:transform 0.2s;}
+  .faq-a{font-size:14px;color:var(--text-soft);line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.35s ease,margin-top 0.2s;}
+  .faq-item.open .faq-a{max-height:200px;margin-top:12px;}
+  .faq-item.open .faq-icon{transform:rotate(45deg);}
+
+  /* ── ABOUT ── */
+  .about-hero{background:var(--ink);padding:80px 48px;position:relative;overflow:hidden;}
+  .about-hero::after{content:'🌿';font-size:300px;position:absolute;right:-60px;top:-40px;opacity:0.05;line-height:1;}
+  .about-hero h1{font-family:'Fraunces',serif;font-size:clamp(40px,6vw,80px);font-weight:900;color:var(--white);letter-spacing:-0.03em;max-width:700px;margin-bottom:20px;position:relative;z-index:1;}
+  .about-hero h1 em{font-style:italic;color:var(--leaf-bright);}
+  .about-hero p{font-size:18px;color:rgba(255,255,255,0.55);max-width:580px;line-height:1.75;position:relative;z-index:1;}
+
+  .mission-section{max-width:900px;margin:0 auto;padding:80px 48px;}
+  .mission-section h2{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,48px);font-weight:900;letter-spacing:-0.02em;margin-bottom:24px;}
+  .mission-section p{font-size:17px;color:var(--text-soft);line-height:1.8;margin-bottom:20px;}
+  .mission-section p:last-child{margin-bottom:0;}
+
+  /* PULL QUOTE */
+  .pull-quote{background:var(--leaf);padding:60px 80px;text-align:center;margin:0 48px;border-radius:24px;}
+  .pq-text{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,36px);font-weight:900;color:#fff;line-height:1.4;font-style:italic;margin-bottom:16px;}
+  .pq-attr{font-size:15px;color:rgba(255,255,255,0.6);}
+
+  /* VALUES */
+  .values-section{max-width:1100px;margin:0 auto;padding:80px 48px;}
+  .values-section h2{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,48px);font-weight:900;text-align:center;margin-bottom:48px;}
+  .values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .value-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:28px;}
+  .value-icon{font-size:36px;margin-bottom:14px;}
+  .value-name{font-family:'Fraunces',serif;font-size:20px;font-weight:900;margin-bottom:8px;}
+  .value-desc{font-size:14px;color:var(--text-soft);line-height:1.7;}
+
+  /* TEAM */
+  .team-section{background:var(--warm);padding:80px 48px;}
+  .team-section h2{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,48px);font-weight:900;text-align:center;margin-bottom:12px;}
+  .team-sub{text-align:center;font-size:16px;color:var(--text-soft);margin-bottom:48px;}
+  .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:0 auto;}
+  .team-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;}
+  .team-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:#fff;margin:0 auto 14px;}
+  .team-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;margin-bottom:4px;}
+  .team-role{font-size:13px;color:var(--text-soft);}
+
+  /* JOIN CTA */
+  .join-cta{padding:80px 48px;text-align:center;}
+  .join-cta h2{font-family:'Fraunces',serif;font-size:clamp(32px,5vw,64px);font-weight:900;letter-spacing:-0.02em;margin-bottom:16px;}
+  .join-cta p{font-size:17px;color:var(--text-soft);margin-bottom:36px;}
+  .join-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .jbtn{font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;padding:15px 32px;border-radius:12px;cursor:pointer;transition:all 0.25s;}
+  .jbtn.primary{background:var(--ink);color:#fff;border:none;}
+  .jbtn.primary:hover{background:var(--leaf);transform:translateY(-2px);}
+  .jbtn.secondary{background:transparent;color:var(--ink);border:2px solid #C8D8C0;}
+  .jbtn.secondary:hover{border-color:var(--leaf);color:var(--leaf);}
+
+  /* SHARED FOOTER */
+  footer{background:var(--ink);padding:40px 48px 24px;}
+  .ft-bottom{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,0.3);}
+  .ft-logo{font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:rgba(255,255,255,0.6);margin-bottom:8px;}
+  .ft-logo span{color:var(--leaf-bright);}
+
+  @media(max-width:900px){
+    nav{padding:0 20px;}
+    .ntab{padding:0 12px;font-size:13px;}
+    .hiw-hero,.price-hero,.about-hero{padding:60px 24px;}
+    .timeline-section,.pricing-section,.mission-section,.values-section,.join-cta{padding:60px 24px;}
+    .tl-step{grid-template-columns:50px 1fr;gap:16px;}
+    .plans-grid{grid-template-columns:1fr;}
+    .restaurant-pricing{grid-template-columns:1fr;padding:32px;}
+    .who-grid,.values-grid,.team-grid{grid-template-columns:1fr 1fr;}
+    .pull-quote{margin:0 24px;padding:40px 32px;}
+    .team-section{padding:60px 24px;}
+    .faq-section{padding:0 24px 60px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="switchPage('hiw')">Agri<span>Connect</span></div>
+  <div class="nav-page-tabs">
+    <div class="ntab active" onclick="switchPage('hiw',this)">How It Works</div>
+    <div class="ntab" onclick="switchPage('pricing',this)">Pricing</div>
+    <div class="ntab" onclick="switchPage('about',this)">About</div>
+  </div>
+  <button class="nav-cta">Get Started →</button>
+</nav>
+
+<!-- ══════════════════════════════ HOW IT WORKS ══════════════════════════════ -->
+<div class="page show" id="page-hiw">
+
+  <div class="hiw-hero">
+    <h1>How <span>AgriConnect</span> works</h1>
+    <p>From farm registration to restaurant kitchen — four simple steps, fully digital, escrow-protected.</p>
+  </div>
+
+  <div class="timeline-section">
+
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-num">1</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-icon">👨‍🌾</div>
+        <div class="tl-title">Farmer registers & builds a profile</div>
+        <div class="tl-desc">Farmers sign up with their name, phone number, farm location, and produce categories. Our team verifies the farm within 48 hours using submitted documents — National ID, land title, and any relevant certifications like dairy permits or UNBS standards.</div>
+        <div class="tl-note"><strong>What farmers create:</strong> A public-facing digital storefront showing their produce, pricing, stock levels, harvest calendar, and reviews from previous restaurant buyers. It is their market stall — live 24/7.</div>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-num">2</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-icon">🔍</div>
+        <div class="tl-title">Restaurant browses the marketplace</div>
+        <div class="tl-desc">Restaurant procurement managers log in and search verified farmers by produce type, district, price range, and rating. They can view full farm profiles including bios, harvest calendars, past reviews from other restaurants, and on-time delivery rates.</div>
+        <div class="tl-note"><strong>Trust is built in:</strong> Only verified, document-checked farmers appear in the marketplace. Each farmer has a public order history and star rating from confirmed restaurant buyers.</div>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-num">3</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-icon">📦</div>
+        <div class="tl-title">Order placed — payment held in escrow</div>
+        <div class="tl-desc">The restaurant selects the produce, quantity, and delivery date, then places the order directly with the farmer. Payment is made via MTN MoMo or Airtel Money and held in AgriConnect's secure escrow — the farmer sees the order confirmed but does not receive payment yet.</div>
+        <div class="tl-note"><strong>Why escrow?</strong> It protects both sides. The farmer knows payment is guaranteed and committed. The restaurant knows their money is only released when delivery is confirmed. No trust required — the system provides it.</div>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-left"><div class="tl-num">4</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-icon">✅</div>
+        <div class="tl-title">Delivery confirmed — farmer paid instantly</div>
+        <div class="tl-desc">The farmer delivers on the agreed date. The restaurant confirms the delivery on the platform — or raises a dispute if there is a quality issue. On confirmation, the escrow releases payment instantly to the farmer's mobile money wallet. Both parties rate each other.</div>
+        <div class="tl-note"><strong>Disputes:</strong> If a restaurant rejects a delivery on quality grounds, AgriConnect's admin team reviews both parties' evidence and mediates a fair resolution within 24 hours.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="who-section">
+    <h2>Built for two kinds of people</h2>
+    <div class="who-grid">
+      <div class="who-card">
+        <h3>👨‍🌾 Ugandan Farmers</h3>
+        <p>AgriConnect is built for smallholder and medium farmers across Uganda who are tired of selling through brokers at a fraction of their produce's real value.</p>
+        <div class="who-list">
+          <div class="who-item"><div class="who-check">✓</div> You grow fruits, vegetables, dairy, meat, or poultry</div>
+          <div class="who-item"><div class="who-check">✓</div> You want direct relationships with food businesses</div>
+          <div class="who-item"><div class="who-check">✓</div> You have a smartphone or know someone who does</div>
+          <div class="who-item"><div class="who-check">✓</div> You use MTN MoMo or Airtel Money</div>
+        </div>
+        <button class="who-cta" style="margin-top:24px;">Register as a Farmer</button>
+      </div>
+      <div class="who-card">
+        <h3>🍽️ Restaurants & Food Businesses</h3>
+        <p>AgriConnect is built for procurement managers, head chefs, and hotel buyers who want fresher produce, better traceability, and lower costs.</p>
+        <div class="who-list">
+          <div class="who-item"><div class="who-check">✓</div> Restaurants, hotels, cafés, and food courts</div>
+          <div class="who-item"><div class="who-check">✓</div> You buy produce at least weekly</div>
+          <div class="who-item"><div class="who-check">✓</div> You want to know where your food comes from</div>
+          <div class="who-item"><div class="who-check">✓</div> You want to reduce food costs without reducing quality</div>
+        </div>
+        <button class="who-cta" style="margin-top:24px;">Browse the Marketplace</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ PRICING ══════════════════════════════ -->
+<div class="page" id="page-pricing">
+
+  <div class="price-hero">
+    <h1>Honest pricing.<br><span>No hidden fees.</span></h1>
+    <p>AgriConnect fees are designed to be recoverable from a single sale. We grow when our farmers grow.</p>
+  </div>
+
+  <div class="pricing-section">
+    <div class="pricing-label">For Farmers</div>
+    <div class="pricing-title">Choose your plan</div>
+
+    <div class="plans-grid">
+
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">Free</div>
+        <div class="plan-period">First 3 months</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="pf-item"><span class="pf-check">✓</span> Basic farm profile</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Up to 5 produce listings</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Receive direct orders</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Mobile money payments</div>
+          <div class="pf-item disabled"><span class="pf-check">✗</span> Priority search ranking</div>
+          <div class="pf-item disabled"><span class="pf-check">✗</span> Harvest calendar</div>
+          <div class="pf-item disabled"><span class="pf-check">✗</span> AgriConnect Verified badge</div>
+        </div>
+        <button class="plan-btn">Get Started Free</button>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">UGX 100K</div>
+        <div class="plan-period">Per year · ~UGX 8,300/month</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="pf-item"><span class="pf-check">✓</span> Full verified profile</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Unlimited produce listings</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Harvest calendar</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Priority search ranking</div>
+          <div class="pf-item"><span class="pf-check">✓</span> AgriConnect Verified badge</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Order analytics</div>
+          <div class="pf-item"><span class="pf-check">✓</span> 24hr customer support</div>
+        </div>
+        <button class="plan-btn">Register My Farm →</button>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-name">Cooperative</div>
+        <div class="plan-price">UGX 300K</div>
+        <div class="plan-period">Per year · For SACCOs & groups</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="pf-item"><span class="pf-check">✓</span> Everything in Standard</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Up to 20 member farmers</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Group profile & branding</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Bulk order aggregation</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Dedicated account manager</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Revenue reporting</div>
+          <div class="pf-item"><span class="pf-check">✓</span> Reduced transaction fee (2%)</div>
+        </div>
+        <button class="plan-btn">Contact Us</button>
+      </div>
+
+    </div>
+
+    <!-- TRANSACTION FEE NOTE -->
+    <div style="background:var(--warm);border-radius:12px;padding:20px 24px;margin-bottom:64px;font-size:14px;color:var(--text-soft);border:1px solid var(--border);">
+      📌 <strong style="color:var(--text);">Transaction fee:</strong> A 3% platform fee applies on all completed orders (charged to the restaurant). This covers escrow processing, payment infrastructure, and dispute resolution. Cooperative plan members pay 2%.
+    </div>
+
+    <!-- RESTAURANT PRICING -->
+    <div class="restaurant-pricing">
+      <div>
+        <div class="rp-label">🍽️ For Restaurants</div>
+        <div class="rp-title">Free to browse. Pay only per order.</div>
+        <div class="rp-desc">Restaurant accounts are free to create. You only pay when you place an order. A 3% fee is added to your order total — this covers escrow processing and platform costs. Premium restaurant subscriptions unlock spend analytics and priority farmer matching.</div>
+        <button class="rp-btn">Create Restaurant Account — Free</button>
+      </div>
+      <div class="rp-features">
+        <div class="rpf-item"><div class="rpf-icon">🛒</div> Browse 200+ verified farms for free</div>
+        <div class="rpf-item"><div class="rpf-icon">🔒</div> Escrow-protected payments on every order</div>
+        <div class="rpf-item"><div class="rpf-icon">📱</div> Pay via MTN MoMo or Airtel Money</div>
+        <div class="rpf-item"><div class="rpf-icon">📊</div> Spend analytics (Premium plan)</div>
+        <div class="rpf-item"><div class="rpf-icon">🔄</div> Recurring order scheduling</div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section" style="padding-left:0;padding-right:0;">
+      <h2>Pricing questions</h2>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Is the annual fee refundable? <span class="faq-icon">+</span></div>
+        <div class="faq-a">We offer a full refund within the first 30 days if you are not satisfied. After 30 days, fees are non-refundable but your account remains active for the full year.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Who pays the 3% transaction fee? <span class="faq-icon">+</span></div>
+        <div class="faq-a">The 3% fee is charged to the restaurant on each order. Farmers receive 100% of their listed price. We believe farmers should not have their earnings reduced further — the restaurant benefits from the platform and pays the service fee.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What happens after my free trial ends? <span class="faq-icon">+</span></div>
+        <div class="faq-a">After 3 months, your profile switches to a limited read-only state. You will still appear in search results but cannot accept new orders until you upgrade to Standard. We will notify you 2 weeks before your trial ends.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I pay the annual fee in instalments? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. We offer quarterly payment of UGX 27,000 for the Standard plan. Contact our support team to set this up via MTN MoMo auto-deduction.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Are there NGO or grant-funded access options? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. We work with development organisations including USAID, GIZ, and Mastercard Foundation partners to subsidise farmer registrations in target communities. Contact partnerships@agriconnect.ug to discuss bulk onboarding programs.</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ ABOUT ══════════════════════════════ -->
+<div class="page" id="page-about">
+
+  <div class="about-hero">
+    <h1>We exist to make Ugandan farming <em>pay</em>.</h1>
+    <p>AgriConnect is a Kampala-based agritech company on a mission to rebuild Uganda's food supply chain — directly connecting the people who grow food with the people who serve it.</p>
+  </div>
+
+  <div class="mission-section">
+    <h2>The problem we are solving</h2>
+    <p>Uganda is one of the most agriculturally productive nations in East Africa. We have rich soils, two growing seasons, and millions of hardworking farming families. Yet the average smallholder farmer captures only 10–25% of the final price their produce sells for.</p>
+    <p>The rest — 75 to 90 cents of every shilling paid by a restaurant or hotel — disappears into a chain of brokers, wholesalers, and middlemen who add cost but not value. This is not the farmers' fault. It is a structural information problem: farmers don't know who is buying, buyers don't know who is selling, and trust between strangers is hard to build.</p>
+    <p>AgriConnect solves this with technology: verified digital identities, transparent pricing, escrow-protected payments, and a two-sided marketplace where farmers and food businesses can find, trust, and transact with each other — directly.</p>
+  </div>
+
+  <div class="pull-quote" style="max-width:1000px;margin:0 auto 0;padding:60px 80px;">
+    <div class="pq-text">"Farmers earn more. Restaurants pay less. Food gets fresher — faster."</div>
+    <div class="pq-attr">AgriConnect's founding principle</div>
+  </div>
+
+  <div class="values-section">
+    <h2>What we stand for</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">⚖️</div>
+        <div class="value-name">Fairness in the value chain</div>
+        <div class="value-desc">We believe the people who grow food deserve a fair share of what it sells for. Every feature we build is designed to put more value back in the hands of farmers.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔍</div>
+        <div class="value-name">Radical transparency</div>
+        <div class="value-desc">Farmers see exactly who is buying and at what price. Restaurants see exactly who is growing and what their track record is. No hidden margins. No information asymmetry.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <div class="value-name">Trust by design</div>
+        <div class="value-desc">We don't ask farmers and restaurants to trust strangers. We build trust into the system through verification, escrow, reviews, and dispute resolution. Technology as an institutional guarantee.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🇺🇬</div>
+        <div class="value-name">Uganda-first thinking</div>
+        <div class="value-desc">Every product decision is made with Uganda's context in mind — mobile money, rural connectivity, district geography, local produce, and language. We are not a foreign platform adapted for Uganda. We are Ugandan.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🌱</div>
+        <div class="value-name">Long-term farmer welfare</div>
+        <div class="value-desc">We measure success not just by GMV but by how much more farmers earn on our platform versus the traditional system. Farmer income growth is our north star metric.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📲</div>
+        <div class="value-name">Accessibility over sophistication</div>
+        <div class="value-desc">The best technology for Uganda is technology that works. USSD fallback, SMS notifications, offline-capable features, and agent-assisted onboarding are not afterthoughts — they are core product requirements.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="team-section">
+    <h2>The team</h2>
+    <p class="team-sub">A multidisciplinary team combining agriculture, technology, and Ugandan market expertise</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#22C55E,#15803D);">DO</div>
+        <div class="team-name">David Onyango</div>
+        <div class="team-role">Co-founder & CEO</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#4F6EF7,#1E40AF);">AM</div>
+        <div class="team-name">Aisha Mukasa</div>
+        <div class="team-role">Co-founder & CTO</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#D4A843,#8B6A1A);">RK</div>
+        <div class="team-name">Robert Kiggundu</div>
+        <div class="team-role">Head of Farmer Relations</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#A855F7,#6B21A8);">NO</div>
+        <div class="team-name">Norah Opio</div>
+        <div class="team-role">Head of Restaurant Partnerships</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="join-cta">
+    <h2>Ready to be part of it?</h2>
+    <p>Join Uganda's fastest-growing direct farm-to-restaurant network.</p>
+    <div class="join-btns">
+      <button class="jbtn primary">👨‍🌾 Register as a Farmer</button>
+      <button class="jbtn secondary">🍽️ Browse as a Restaurant</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="ft-logo">Agri<span>Connect</span></div>
+  <div class="ft-bottom">
+    <span>© 2026 AgriConnect Uganda Ltd. All rights reserved.</span>
+    <span>🇺🇬 Built in Uganda, for Uganda</span>
+  </div>
+</footer>
+
+<script>
+  function switchPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('show'));
+    document.getElementById('page-' + id).classList.add('show');
+    if (el) {
+      document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>

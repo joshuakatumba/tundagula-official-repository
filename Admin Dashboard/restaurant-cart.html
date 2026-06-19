@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — Cart & Checkout</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0F1A14; --panel: #1C2B1F;
+    --fresh: #2ECC71; --fresh-dim: #27AE60;
+    --gold: #F0C040; --text: #0F1A14;
+    --text-soft: #607060; --text-muted: #9AAA9A;
+    --border: #E2EDE4; --white: #FFFFFF;
+    --red: #E74C3C; --sidebar-w: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body { font-family: 'Instrument Sans', sans-serif; background: #F2F7F3; color: var(--text); display: flex; }
+
+  .sidebar { width: var(--sidebar-w); background: var(--night); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; }
+  .sidebar-logo { padding: 26px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--white); }
+  .logo span { color: var(--fresh); }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; }
+  .sidebar-user { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #2ECC71, #1A8A4A); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+  .sidebar-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.22); padding: 12px 10px 5px; margin-top: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.2s; }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: rgba(46,204,113,0.14); color: var(--fresh); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-chip { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+  .sidebar-bottom { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.07); }
+  .plan-badge { background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--gold); }
+  .plan-badge strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  .main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  .topbar { background: var(--white); height: 62px; padding: 0 32px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
+  .back-btn { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-soft); cursor: pointer; padding: 6px 10px; border-radius: 7px; border: 1px solid transparent; transition: all 0.2s; }
+  .back-btn:hover { background: #F2F7F3; border-color: var(--border); color: var(--text); }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--night); }
+  .topbar-spacer { flex: 1; }
+  .topbar-step { font-size: 13px; color: var(--text-muted); }
+
+  /* CHECKOUT STEPS */
+  .step-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; gap: 0; }
+
+  .step-item { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; flex-shrink: 0; transition: all 0.3s; }
+  .step-circle.done { background: var(--fresh); color: var(--night); }
+  .step-circle.active { background: var(--night); color: #fff; }
+  .step-circle.pending { background: #EEF4EE; color: var(--text-muted); border: 2px solid var(--border); }
+  .step-label { font-size: 13px; font-weight: 500; }
+  .step-label.active { color: var(--night); font-weight: 700; }
+  .step-label.done { color: var(--fresh-dim); }
+  .step-label.pending { color: var(--text-muted); }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; }
+  .step-line.done { background: var(--fresh); }
+
+  .page-content { padding: 28px 32px 60px; display: flex; gap: 24px; align-items: flex-start; }
+
+  .cart-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+  .summary-col { width: 320px; flex-shrink: 0; position: sticky; top: 136px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* BOX */
+  .box { background: var(--white); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; animation: riseIn 0.35s ease both; }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .box:nth-child(2) { animation-delay: 0.07s; }
+  .box:nth-child(3) { animation-delay: 0.14s; }
+  .box-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .box-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--night); }
+  .box-sub { font-size: 13px; color: var(--text-muted); }
+  .box-body { padding: 20px 22px; }
+
+  /* CART GROUPS (by farmer) */
+  .cart-group { margin-bottom: 24px; }
+  .cart-group:last-child { margin-bottom: 0; }
+
+  .group-header { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .group-avatar { width: 38px; height: 38px; border-radius: 9px; background: linear-gradient(135deg, #2ECC71, #1A6B38); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .group-name { font-size: 14px; font-weight: 700; color: var(--night); }
+  .group-loc { font-size: 12px; color: var(--text-muted); }
+  .group-verified { margin-left: auto; background: rgba(46,204,113,0.12); color: var(--fresh-dim); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+
+  /* CART ITEMS */
+  .cart-item { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #F0F4F0; }
+  .cart-item:last-child { border-bottom: none; }
+  .item-emoji { font-size: 30px; width: 44px; text-align: center; flex-shrink: 0; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name { font-size: 15px; font-weight: 600; color: var(--night); margin-bottom: 3px; }
+  .item-unit-price { font-size: 12px; color: var(--text-muted); }
+  .item-qty-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .qty-btn { width: 28px; height: 28px; border-radius: 6px; border: 1.5px solid var(--border); background: #F7FAF8; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .qty-btn:hover { border-color: var(--fresh); color: var(--fresh-dim); }
+  .qty-num { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--night); min-width: 28px; text-align: center; }
+  .qty-unit { font-size: 12px; color: var(--text-muted); }
+  .item-total { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--night); text-align: right; white-space: nowrap; min-width: 90px; }
+  .item-remove { font-size: 16px; cursor: pointer; color: var(--text-muted); transition: color 0.2s; margin-left: 8px; }
+  .item-remove:hover { color: var(--red); }
+
+  .group-subtotal { display: flex; justify-content: space-between; align-items: center; padding: 12px 0 0; margin-top: 4px; font-size: 13px; }
+  .group-subtotal span { color: var(--text-soft); }
+  .group-subtotal strong { font-family: 'Syne', sans-serif; font-size: 15px; color: var(--night); }
+
+  /* DELIVERY SECTION */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; }
+  .field input, .field select, .field textarea { font-family: 'Instrument Sans', sans-serif; font-size: 14px; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: #F7FAF8; color: var(--text); outline: none; transition: border-color 0.2s; width: 100%; -webkit-appearance: none; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--fresh); background: #fff; }
+  .field textarea { min-height: 72px; line-height: 1.5; resize: vertical; }
+  .field .hint { font-size: 12px; color: var(--text-muted); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* PAYMENT METHOD */
+  .payment-options { display: flex; flex-direction: column; gap: 10px; }
+  .pay-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .pay-option:hover { border-color: #B8D8B8; }
+  .pay-option.selected { border-color: var(--fresh); background: rgba(46,204,113,0.05); }
+  .pay-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #C8D8C8; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .pay-option.selected .pay-radio { border-color: var(--fresh); background: var(--fresh); box-shadow: inset 0 0 0 3px #fff; }
+  .pay-icon { font-size: 26px; flex-shrink: 0; }
+  .pay-name { font-size: 14px; font-weight: 600; color: var(--night); }
+  .pay-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .pay-badge { margin-left: auto; background: rgba(46,204,113,0.12); color: var(--fresh-dim); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
+
+  /* ESCROW EXPLAINER */
+  .escrow-box { background: linear-gradient(135deg, rgba(15,26,20,0.04), rgba(46,204,113,0.06)); border: 1px solid rgba(46,204,113,0.2); border-radius: 12px; padding: 16px 18px; display: flex; gap: 14px; }
+  .escrow-icon { font-size: 28px; flex-shrink: 0; }
+  .escrow-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--night); margin-bottom: 4px; }
+  .escrow-text { font-size: 13px; color: var(--text-soft); line-height: 1.6; }
+
+  .escrow-steps { display: flex; gap: 0; margin-top: 14px; }
+  .es-step { flex: 1; text-align: center; position: relative; }
+  .es-step::after { content: '→'; position: absolute; right: -8px; top: 14px; font-size: 14px; color: var(--text-muted); }
+  .es-step:last-child::after { display: none; }
+  .es-num { width: 28px; height: 28px; border-radius: 50%; background: var(--night); color: #fff; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; }
+  .es-label { font-size: 11px; color: var(--text-soft); line-height: 1.3; }
+
+  /* SUMMARY BOX */
+  .summary-box { background: var(--white); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+  .summary-header { background: var(--night); padding: 16px 20px; }
+  .summary-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+  .summary-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .summary-body { padding: 18px 20px; }
+  .sum-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-soft); margin-bottom: 10px; }
+  .sum-row.total { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--night); border-top: 2px solid var(--border); padding-top: 12px; margin-top: 4px; margin-bottom: 0; }
+  .sum-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  .sum-farmer { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-soft); margin-bottom: 6px; }
+  .sum-farmer strong { color: var(--text); font-weight: 500; }
+
+  .btn-checkout { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; padding: 15px; background: var(--fresh); color: var(--night); border: none; border-radius: 10px; cursor: pointer; width: 100%; transition: all 0.2s; margin-top: 16px; }
+  .btn-checkout:hover { background: var(--fresh-dim); color: #fff; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(46,204,113,0.3); }
+
+  .save-order-btn { font-family: 'Instrument Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 11px; background: transparent; color: var(--text-soft); border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; transition: all 0.2s; }
+  .save-order-btn:hover { border-color: var(--night); color: var(--night); }
+
+  .trust-items { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .trust-item { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-muted); }
+  .trust-icon { font-size: 14px; }
+
+  /* SUCCESS STATE (hidden by default) */
+  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(15,26,20,0.7); backdrop-filter: blur(6px); z-index: 300; align-items: center; justify-content: center; }
+  .success-overlay.show { display: flex; }
+  .success-card { background: var(--white); border-radius: 20px; padding: 48px 40px; text-align: center; max-width: 440px; width: 90%; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-icon { font-size: 64px; margin-bottom: 16px; }
+  .success-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--night); margin-bottom: 8px; }
+  .success-text { font-size: 15px; color: var(--text-soft); line-height: 1.65; margin-bottom: 28px; }
+  .success-ref { background: #F2F7F3; border-radius: 8px; padding: 12px 16px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--fresh-dim); letter-spacing: 0.1em; margin-bottom: 24px; }
+  .btn-done { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 32px; background: var(--night); color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .btn-done:hover { background: var(--panel); }
+
+  @media (max-width: 1000px) { .summary-col { display: none; } }
+  @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-wrap { margin-left: 0; } .page-content { padding: 16px; flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo">Agri<span>Connect</span></div><div class="logo-sub">Restaurant Portal</div></div>
+  <div class="sidebar-user"><div class="user-avatar">KK</div><div><div class="user-name">Kati Kati Restaurant</div><div class="user-role">Procurement Manager</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Procurement</div>
+    <a class="nav-item"><span class="nav-icon">🛒</span> Browse Marketplace</a>
+    <a class="nav-item"><span class="nav-icon">❤️</span> Saved Farmers</a>
+    <a class="nav-item active"><span class="nav-icon">📦</span> My Orders <span class="nav-chip">2</span></a>
+    <a class="nav-item"><span class="nav-icon">🔄</span> Recurring Orders</a>
+    <div class="nav-group-label">Finance</div>
+    <a class="nav-item"><span class="nav-icon">💳</span> Payments & Escrow</a>
+    <a class="nav-item"><span class="nav-icon">📊</span> Spend Analytics</a>
+    <div class="nav-group-label">Account</div>
+    <a class="nav-item"><span class="nav-icon">🍽️</span> Restaurant Profile</a>
+    <a class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="plan-badge"><strong>⭐ Premium Plan</strong>Priority matching · Unlimited orders</div></div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <div class="topbar">
+    <div class="back-btn">← Continue shopping</div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-title">Checkout</div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-step">3 items · 2 farmers</div>
+  </div>
+
+  <!-- STEP BAR -->
+  <div class="step-bar">
+    <div class="step-item">
+      <div class="step-circle done">✓</div>
+      <span class="step-label done">Browse</span>
+    </div>
+    <div class="step-line done"></div>
+    <div class="step-item">
+      <div class="step-circle active">2</div>
+      <span class="step-label active">Review Cart</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-circle pending">3</div>
+      <span class="step-label pending">Payment</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-circle pending">4</div>
+      <span class="step-label pending">Confirmed</span>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- CART COLUMN -->
+    <div class="cart-col">
+
+      <!-- CART ITEMS -->
+      <div class="box">
+        <div class="box-header">
+          <div class="box-title">Your Cart</div>
+          <div class="box-sub">3 items from 2 farmers</div>
+        </div>
+        <div class="box-body">
+
+          <!-- GROUP 1: Ssekandi Farm -->
+          <div class="cart-group">
+            <div class="group-header">
+              <div class="group-avatar">ES</div>
+              <div>
+                <div class="group-name">Emmanuel Ssekandi</div>
+                <div class="group-loc">📍 Kayunga District · Ssekandi Family Farm</div>
+              </div>
+              <span class="group-verified">✓ Verified</span>
+            </div>
+
+            <div class="cart-item">
+              <div class="item-emoji">🍍</div>
+              <div class="item-info">
+                <div class="item-name">Fresh Kayunga Pineapples</div>
+                <div class="item-unit-price">UGX 5,000 per kg</div>
+                <div class="item-qty-row">
+                  <button class="qty-btn" onclick="changeQty('q1', -5)">−</button>
+                  <span class="qty-num" id="q1">40</span>
+                  <span class="qty-unit">kg</span>
+                  <button class="qty-btn" onclick="changeQty('q1', 5)">+</button>
+                </div>
+              </div>
+              <div class="item-total" id="t1">UGX 200,000</div>
+              <span class="item-remove" title="Remove">×</span>
+            </div>
+
+            <div class="cart-item">
+              <div class="item-emoji">🍋</div>
+              <div class="item-info">
+                <div class="item-name">Passion Fruit</div>
+                <div class="item-unit-price">UGX 8,000 per kg</div>
+                <div class="item-qty-row">
+                  <button class="qty-btn" onclick="changeQty('q2', -5)">−</button>
+                  <span class="qty-num" id="q2">10</span>
+                  <span class="qty-unit">kg</span>
+                  <button class="qty-btn" onclick="changeQty('q2', 5)">+</button>
+                </div>
+              </div>
+              <div class="item-total" id="t2">UGX 80,000</div>
+              <span class="item-remove" title="Remove">×</span>
+            </div>
+
+            <div class="group-subtotal">
+              <span>Subtotal — Ssekandi Farm</span>
+              <strong>UGX 280,000</strong>
+            </div>
+          </div>
+
+          <!-- GROUP 2: Akello Nancy -->
+          <div class="cart-group">
+            <div class="group-header">
+              <div class="group-avatar" style="background:linear-gradient(135deg,#E67E22,#8B4513);">AN</div>
+              <div>
+                <div class="group-name">Akello Nancy</div>
+                <div class="group-loc">📍 Wakiso District · Nancy's Green Farm</div>
+              </div>
+              <span class="group-verified">✓ Verified</span>
+            </div>
+
+            <div class="cart-item">
+              <div class="item-emoji">🥬</div>
+              <div class="item-info">
+                <div class="item-name">Sukuma Wiki (Kale)</div>
+                <div class="item-unit-price">UGX 2,500 per kg</div>
+                <div class="item-qty-row">
+                  <button class="qty-btn" onclick="changeQty('q3', -5)">−</button>
+                  <span class="qty-num" id="q3">20</span>
+                  <span class="qty-unit">kg</span>
+                  <button class="qty-btn" onclick="changeQty('q3', 5)">+</button>
+                </div>
+              </div>
+              <div class="item-total" id="t3">UGX 50,000</div>
+              <span class="item-remove" title="Remove">×</span>
+            </div>
+
+            <div class="group-subtotal">
+              <span>Subtotal — Nancy's Green Farm</span>
+              <strong>UGX 50,000</strong>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DELIVERY DETAILS -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Delivery Details</div></div>
+        <div class="box-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Delivery Date <span style="color:var(--red)">*</span></label>
+              <input type="date" value="2026-04-04">
+            </div>
+            <div class="field">
+              <label>Preferred Time</label>
+              <select>
+                <option>Morning (6am – 10am)</option>
+                <option>Midday (10am – 2pm)</option>
+                <option>Afternoon (2pm – 6pm)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Delivery Address <span style="color:var(--red)">*</span></label>
+            <input type="text" placeholder="e.g. Kati Kati Restaurant, Lugogo Mall, Kampala" value="Kati Kati Restaurant, Lugogo Mall, Kampala">
+          </div>
+          <div class="field">
+            <label>Special Instructions</label>
+            <textarea placeholder="e.g. Deliver to back kitchen entrance, call on arrival, leave with head chef..."></textarea>
+            <div class="hint">Shared with each farmer on their order notification</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT METHOD -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Payment Method</div></div>
+        <div class="box-body">
+          <div class="payment-options">
+            <div class="pay-option selected" onclick="selectPay(this)">
+              <div class="pay-radio"></div>
+              <div class="pay-icon">📱</div>
+              <div><div class="pay-name">MTN Mobile Money</div><div class="pay-desc">+256 77X XXX XXX</div></div>
+              <span class="pay-badge">Recommended</span>
+            </div>
+            <div class="pay-option" onclick="selectPay(this)">
+              <div class="pay-radio"></div>
+              <div class="pay-icon">📲</div>
+              <div><div class="pay-name">Airtel Money</div><div class="pay-desc">+256 75X XXX XXX</div></div>
+            </div>
+            <div class="pay-option" onclick="selectPay(this)">
+              <div class="pay-radio"></div>
+              <div class="pay-icon">🏦</div>
+              <div><div class="pay-name">Bank Transfer</div><div class="pay-desc">Stanbic / Equity / ABSA</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESCROW EXPLAINER -->
+      <div class="escrow-box">
+        <div class="escrow-icon">🔒</div>
+        <div>
+          <div class="escrow-title">How escrow payment works</div>
+          <div class="escrow-text">Your payment is held securely by AgriConnect and only released to the farmer after you confirm that the delivery arrived in good condition.</div>
+          <div class="escrow-steps">
+            <div class="es-step"><div class="es-num">1</div><div class="es-label">You pay via MoMo</div></div>
+            <div class="es-step"><div class="es-num">2</div><div class="es-label">Farmer delivers</div></div>
+            <div class="es-step"><div class="es-num">3</div><div class="es-label">You confirm receipt</div></div>
+            <div class="es-step"><div class="es-num">4</div><div class="es-label">Farmer paid</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUMMARY COLUMN -->
+    <div class="summary-col">
+      <div class="summary-box">
+        <div class="summary-header">
+          <div class="summary-title">Order Summary</div>
+          <div class="summary-sub">2 farmers · 3 produce items</div>
+        </div>
+        <div class="summary-body">
+
+          <div class="sum-farmer">
+            <span>Ssekandi Farm (2 items)</span>
+            <strong>UGX 280,000</strong>
+          </div>
+          <div class="sum-farmer">
+            <span>Nancy's Farm (1 item)</span>
+            <strong>UGX 50,000</strong>
+          </div>
+
+          <div class="sum-divider"></div>
+
+          <div class="sum-row"><span>Produce subtotal</span><span>UGX 330,000</span></div>
+          <div class="sum-row"><span>Delivery (2 farms)</span><span>UGX 30,000</span></div>
+          <div class="sum-row"><span>AgriConnect fee (3%)</span><span>UGX 9,900</span></div>
+          <div class="sum-row total"><span>Total</span><span>UGX 369,900</span></div>
+
+          <button class="btn-checkout" onclick="showSuccess()">Pay UGX 369,900 →</button>
+          <button class="save-order-btn">Save as recurring order</button>
+
+          <div class="trust-items">
+            <div class="trust-item"><span class="trust-icon">🔒</span> Escrow-protected payment</div>
+            <div class="trust-item"><span class="trust-icon">✓</span> Both farmers are verified</div>
+            <div class="trust-item"><span class="trust-icon">↩️</span> Dispute resolution within 24hrs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Order Placed!</div>
+    <div class="success-text">Your order has been sent to <strong>Emmanuel Ssekandi</strong> and <strong>Akello Nancy</strong>. Payment is held in escrow and will be released after you confirm delivery.</div>
+    <div class="success-ref">Order #AGC-2026-00847</div>
+    <button class="btn-done" onclick="document.getElementById('successOverlay').classList.remove('show')">View My Orders →</button>
+  </div>
+</div>
+
+<script>
+  const prices = { q1: 5000, q2: 8000, q3: 2500 };
+  const minQty = { q1: 20, q2: 5, q3: 10 };
+
+  function changeQty(id, delta) {
+    const el = document.getElementById(id);
+    const newVal = Math.max(minQty[id], parseInt(el.textContent) + delta);
+    el.textContent = newVal;
+    const total = newVal * prices[id];
+    document.getElementById('t' + id.slice(1)).textContent = 'UGX ' + total.toLocaleString();
+  }
+
+  function selectPay(el) {
+    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function showSuccess() {
+    document.getElementById('successOverlay').classList.add('show');
+  }
+</script>
+</body>
+</html>

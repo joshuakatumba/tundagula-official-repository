@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect Admin — Farmer Verification Queue</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0D0F14;--surface:#13161E;--panel:#1A1E28;--border:#252A38;--border-light:#2E3448;
+    --accent:#4F6EF7;--green:#22C55E;--amber:#F59E0B;--red:#EF4444;--purple:#A855F7;
+    --text:#E8ECF4;--text-soft:#8892A8;--text-muted:#4A5270;
+    --mono:'IBM Plex Mono',monospace;--sans:'Manrope',sans-serif;--sw:220px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;}
+  .sb-logo{padding:20px 18px;border-bottom:1px solid var(--border);}
+  .sb-logo-text{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);}
+  .sb-logo-sub{font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;font-family:var(--mono);}
+  .sb-admin{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .sb-admin-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+  .sb-admin-name{font-size:13px;font-weight:600;color:var(--text);}
+  .sb-admin-role{font-size:10px;color:var(--text-muted);font-family:var(--mono);margin-top:1px;}
+  .sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:1px;overflow-y:auto;}
+  .sb-section{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);padding:12px 8px 5px;}
+  .sb-link{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;font-size:13px;color:var(--text-soft);cursor:pointer;transition:all 0.15s;}
+  .sb-link:hover{background:var(--panel);color:var(--text);}
+  .sb-link.active{background:rgba(79,110,247,0.15);color:var(--accent);}
+  .sb-icon{font-size:14px;width:16px;text-align:center;}
+  .sb-badge{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;}
+  .sb-badge.red{background:rgba(239,68,68,0.15);color:var(--red);}
+  .sb-badge.amber{background:rgba(245,158,11,0.15);color:var(--amber);}
+  .sb-footer{padding:14px 18px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text-muted);}
+
+  .main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);height:54px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;}
+  .topbar-left{display:flex;align-items:center;gap:16px;}
+  .topbar-title{font-family:var(--mono);font-size:13px;color:var(--text-soft);}
+  .topbar-title span{color:var(--text);}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .icon-btn{width:32px;height:32px;background:var(--panel);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
+
+  .content{padding:24px 28px 60px;}
+
+  /* QUEUE STATS */
+  .queue-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .qs-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;animation:riseIn 0.4s ease both;}
+  @keyframes riseIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .qs-card:nth-child(2){animation-delay:0.05s;}.qs-card:nth-child(3){animation-delay:0.1s;}.qs-card:nth-child(4){animation-delay:0.15s;}
+  .qs-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;}
+  .qs-val{font-family:var(--mono);font-size:28px;font-weight:600;}
+  .qs-val.amber{color:var(--amber);}.qs-val.green{color:var(--green);}.qs-val.red{color:var(--red);}.qs-val.blue{color:var(--accent);}
+  .qs-sub{font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+  /* FILTERS */
+  .filter-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .filter-tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px;}
+  .ftab{font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:5px;cursor:pointer;color:var(--text-soft);transition:all 0.15s;border:none;background:transparent;}
+  .ftab:hover{color:var(--text);}
+  .ftab.active{background:var(--panel);color:var(--accent);border:1px solid var(--border);}
+  .filter-spacer{flex:1;}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;}
+  .search-box input{background:transparent;border:none;outline:none;font-family:var(--mono);font-size:12px;color:var(--text);width:200px;}
+  .search-box input::placeholder{color:var(--text-muted);}
+  .sort-sel{font-family:var(--mono);font-size:11px;padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text-soft);outline:none;cursor:pointer;}
+
+  /* MAIN LAYOUT */
+  .verify-layout{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:flex-start;}
+
+  /* QUEUE LIST */
+  .queue-list{display:flex;flex-direction:column;gap:12px;}
+
+  .farmer-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.2s;animation:riseIn 0.35s ease both;}
+  .farmer-card:nth-child(2){animation-delay:0.05s;}.farmer-card:nth-child(3){animation-delay:0.1s;}.farmer-card:nth-child(4){animation-delay:0.15s;}.farmer-card:nth-child(5){animation-delay:0.2s;}
+  .farmer-card:hover{border-color:var(--border-light);}
+  .farmer-card.selected{border-color:var(--accent);background:rgba(79,110,247,0.04);}
+
+  .fc-head{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--border);}
+  .fc-avatar{width:44px;height:44px;border-radius:8px;background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent);flex-shrink:0;}
+  .fc-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;}
+  .fc-meta{font-family:var(--mono);font-size:11px;color:var(--text-muted);}
+  .fc-status{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:0.04em;}
+  .badge.amber{background:rgba(245,158,11,0.12);color:var(--amber);}
+  .badge.green{background:rgba(34,197,94,0.12);color:var(--green);}
+  .badge.red{background:rgba(239,68,68,0.12);color:var(--red);}
+  .badge.blue{background:rgba(79,110,247,0.12);color:var(--accent);}
+  .badge.gray{background:rgba(74,82,112,0.25);color:var(--text-soft);}
+  .fc-submitted{font-family:var(--mono);font-size:10px;color:var(--text-muted);}
+
+  .fc-body{padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .fc-field{display:flex;flex-direction:column;gap:3px;}
+  .fc-field-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);}
+  .fc-field-val{font-size:13px;color:var(--text-soft);}
+  .fc-field-val strong{color:var(--text);font-weight:600;}
+
+  .fc-docs{display:flex;gap:8px;padding:0 18px 14px;flex-wrap:wrap;}
+  .doc-chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--text-soft);cursor:pointer;transition:all 0.15s;}
+  .doc-chip:hover{border-color:var(--accent);color:var(--accent);}
+  .doc-chip.missing{border-color:rgba(239,68,68,0.3);color:var(--red);}
+
+  .fc-actions{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--border);}
+  .act-btn{font-family:var(--mono);font-size:12px;font-weight:600;padding:9px 16px;border-radius:7px;cursor:pointer;border:1px solid;transition:all 0.15s;flex:1;text-align:center;}
+  .act-btn.approve{border-color:rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.08);}
+  .act-btn.approve:hover{background:rgba(34,197,94,0.2);}
+  .act-btn.reject{border-color:rgba(239,68,68,0.3);color:var(--red);background:rgba(239,68,68,0.08);}
+  .act-btn.reject:hover{background:rgba(239,68,68,0.2);}
+  .act-btn.review{border-color:rgba(245,158,11,0.3);color:var(--amber);background:rgba(245,158,11,0.08);}
+  .act-btn.review:hover{background:rgba(245,158,11,0.2);}
+  .act-btn.contact{border-color:var(--border);color:var(--text-soft);background:transparent;}
+  .act-btn.contact:hover{border-color:var(--border-light);color:var(--text);}
+
+  /* DETAIL PANEL */
+  .detail-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:74px;animation:riseIn 0.4s 0.1s ease both;}
+  .dp-header{background:var(--panel);padding:16px 20px;border-bottom:1px solid var(--border);}
+  .dp-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);}
+  .dp-subtitle{font-size:14px;font-weight:700;color:var(--text);margin-top:4px;}
+  .dp-body{padding:0;}
+
+  .dp-section{padding:16px 20px;border-bottom:1px solid var(--border);}
+  .dp-section:last-child{border-bottom:none;}
+  .dp-section-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:12px;}
+
+  .dp-field{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;}
+  .dp-field:last-child{margin-bottom:0;}
+  .dp-field-key{color:var(--text-muted);}
+  .dp-field-val{color:var(--text);font-weight:500;text-align:right;}
+
+  .checklist{display:flex;flex-direction:column;gap:8px;}
+  .check-item{display:flex;align-items:center;gap:10px;font-size:13px;}
+  .check-icon{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+  .check-icon.pass{background:rgba(34,197,94,0.15);color:var(--green);}
+  .check-icon.fail{background:rgba(239,68,68,0.15);color:var(--red);}
+  .check-icon.warn{background:rgba(245,158,11,0.15);color:var(--amber);}
+  .check-label{color:var(--text-soft);}
+  .check-label strong{color:var(--text);}
+
+  .dp-actions{padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+  .dp-btn{font-family:var(--mono);font-size:12px;font-weight:600;padding:11px;border-radius:7px;cursor:pointer;border:1px solid;text-align:center;transition:all 0.15s;}
+  .dp-btn.approve{border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.1);}
+  .dp-btn.approve:hover{background:rgba(34,197,94,0.25);}
+  .dp-btn.reject{border-color:rgba(239,68,68,0.4);color:var(--red);background:rgba(239,68,68,0.1);}
+  .dp-btn.reject:hover{background:rgba(239,68,68,0.25);}
+  .dp-btn.info{border-color:var(--border);color:var(--text-soft);background:transparent;}
+  .dp-btn.info:hover{border-color:var(--border-light);color:var(--text);}
+
+  .note-box{background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text-muted);width:100%;resize:vertical;min-height:72px;outline:none;margin-top:4px;}
+  .note-box:focus{border-color:var(--accent);color:var(--text);}
+
+  @media(max-width:1100px){.verify-layout{grid-template-columns:1fr;}.detail-panel{position:relative;top:0;}}
+  @media(max-width:900px){.sidebar{transform:translateX(-100%);}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo"><div class="sb-logo-text">// AGRICONNECT</div><div class="sb-logo-sub">Admin Console v1.0</div></div>
+  <div class="sb-admin"><div class="sb-admin-dot"></div><div><div class="sb-admin-name">David Onyango</div><div class="sb-admin-role">SUPER_ADMIN</div></div></div>
+  <nav class="sb-nav">
+    <div class="sb-section">Platform</div>
+    <a class="sb-link"><span class="sb-icon">⬛</span> Overview</a>
+    <a class="sb-link"><span class="sb-icon">📊</span> Analytics</a>
+    <div class="sb-section">Users</div>
+    <a class="sb-link"><span class="sb-icon">👨‍🌾</span> Farmers <span class="sb-badge amber">7</span></a>
+    <a class="sb-link"><span class="sb-icon">🍽</span> Restaurants</a>
+    <a class="sb-link active"><span class="sb-icon">✅</span> Verification Queue <span class="sb-badge red">5</span></a>
+    <div class="sb-section">Operations</div>
+    <a class="sb-link"><span class="sb-icon">📦</span> Orders</a>
+    <a class="sb-link"><span class="sb-icon">⚠️</span> Disputes <span class="sb-badge red">2</span></a>
+    <a class="sb-link"><span class="sb-icon">🚚</span> Logistics</a>
+    <a class="sb-link"><span class="sb-icon">💳</span> Escrow & Payments</a>
+    <div class="sb-section">Finance</div>
+    <a class="sb-link"><span class="sb-icon">💰</span> Revenue</a>
+    <div class="sb-section">System</div>
+    <a class="sb-link"><span class="sb-icon">⚙️</span> Settings</a>
+    <a class="sb-link"><span class="sb-icon">📋</span> Audit Log</a>
+  </nav>
+  <div class="sb-footer">v1.0.0 · UG · 01 Apr 2026</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">admin / users / <span>verification_queue</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">⚙️</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="queue-stats">
+      <div class="qs-card"><div class="qs-label">Pending Review</div><div class="qs-val amber">5</div><div class="qs-sub">avg wait: 38hrs</div></div>
+      <div class="qs-card"><div class="qs-label">Approved (Apr)</div><div class="qs-val green">23</div><div class="qs-sub">avg time: 28hrs</div></div>
+      <div class="qs-card"><div class="qs-label">Rejected (Apr)</div><div class="qs-val red">4</div><div class="qs-sub">mostly docs missing</div></div>
+      <div class="qs-card"><div class="qs-label">Total Verified</div><div class="qs-val blue">218</div><div class="qs-sub">on platform</div></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-row">
+      <div class="filter-tabs">
+        <button class="ftab active">All (5)</button>
+        <button class="ftab">Pending (3)</button>
+        <button class="ftab">Needs Info (2)</button>
+        <button class="ftab">Approved</button>
+        <button class="ftab">Rejected</button>
+      </div>
+      <div class="filter-spacer"></div>
+      <div class="search-box"><span style="color:var(--text-muted);font-size:13px;">⌕</span><input type="text" placeholder="search farmers..."></div>
+      <select class="sort-sel"><option>Sort: Oldest first</option><option>Sort: Newest first</option><option>Sort: District</option></select>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="verify-layout">
+
+      <!-- QUEUE LIST -->
+      <div class="queue-list">
+
+        <!-- FARMER 1 — Selected -->
+        <div class="farmer-card selected">
+          <div class="fc-head">
+            <div class="fc-avatar">RK</div>
+            <div>
+              <div class="fc-name">Rugaba Kenneth</div>
+              <div class="fc-meta">+256 77X XXX XXX · rugaba.k@gmail.com</div>
+            </div>
+            <div class="fc-status">
+              <span class="badge amber">PENDING</span>
+              <span class="fc-submitted">Submitted 38hrs ago</span>
+            </div>
+          </div>
+          <div class="fc-body">
+            <div class="fc-field"><div class="fc-field-label">District</div><div class="fc-field-val"><strong>Mbarara</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Type</div><div class="fc-field-val"><strong>Dairy</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Size</div><div class="fc-field-val"><strong>8 acres</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Plan</div><div class="fc-field-val"><strong>Standard</strong></div></div>
+          </div>
+          <div class="fc-docs">
+            <div class="doc-chip">📄 National ID</div>
+            <div class="doc-chip">📋 Land Title</div>
+            <div class="doc-chip">🥛 Dairy Permit</div>
+            <div class="doc-chip missing">⚠️ UNBS Cert — missing</div>
+          </div>
+          <div class="fc-actions">
+            <button class="act-btn approve">✓ Approve</button>
+            <button class="act-btn reject">✗ Reject</button>
+            <button class="act-btn review">⚠ Request Info</button>
+            <button class="act-btn contact">📞 Contact</button>
+          </div>
+        </div>
+
+        <!-- FARMER 2 -->
+        <div class="farmer-card">
+          <div class="fc-head">
+            <div class="fc-avatar">AM</div>
+            <div><div class="fc-name">Atim Margaret</div><div class="fc-meta">+256 75X XXX XXX · atim.m@yahoo.com</div></div>
+            <div class="fc-status"><span class="badge amber">PENDING</span><span class="fc-submitted">Submitted 52hrs ago</span></div>
+          </div>
+          <div class="fc-body">
+            <div class="fc-field"><div class="fc-field-label">District</div><div class="fc-field-val"><strong>Gulu</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Type</div><div class="fc-field-val"><strong>Mixed</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Size</div><div class="fc-field-val"><strong>15 acres</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Plan</div><div class="fc-field-val"><strong>Starter</strong></div></div>
+          </div>
+          <div class="fc-docs">
+            <div class="doc-chip">📄 National ID</div>
+            <div class="doc-chip">📋 Land Title</div>
+            <div class="doc-chip missing">⚠️ Farm Photo — missing</div>
+          </div>
+          <div class="fc-actions">
+            <button class="act-btn approve">✓ Approve</button>
+            <button class="act-btn reject">✗ Reject</button>
+            <button class="act-btn review">⚠ Request Info</button>
+            <button class="act-btn contact">📞 Contact</button>
+          </div>
+        </div>
+
+        <!-- FARMER 3 -->
+        <div class="farmer-card">
+          <div class="fc-head">
+            <div class="fc-avatar">OK</div>
+            <div><div class="fc-name">Opio Kenneth</div><div class="fc-meta">+256 70X XXX XXX · opio.k@gmail.com</div></div>
+            <div class="fc-status"><span class="badge blue">NEEDS INFO</span><span class="fc-submitted">Submitted 71hrs ago</span></div>
+          </div>
+          <div class="fc-body">
+            <div class="fc-field"><div class="fc-field-label">District</div><div class="fc-field-val"><strong>Lira</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Type</div><div class="fc-field-val"><strong>Fruits</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Size</div><div class="fc-field-val"><strong>5 acres</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Plan</div><div class="fc-field-val"><strong>Standard</strong></div></div>
+          </div>
+          <div class="fc-docs">
+            <div class="doc-chip">📄 National ID</div>
+            <div class="doc-chip missing">⚠️ Land Title — missing</div>
+            <div class="doc-chip missing">⚠️ GPS Pin — not set</div>
+          </div>
+          <div class="fc-actions">
+            <button class="act-btn approve">✓ Approve</button>
+            <button class="act-btn reject">✗ Reject</button>
+            <button class="act-btn review">⚠ Request Info</button>
+            <button class="act-btn contact">📞 Contact</button>
+          </div>
+        </div>
+
+        <!-- FARMER 4 -->
+        <div class="farmer-card">
+          <div class="fc-head">
+            <div class="fc-avatar">NB</div>
+            <div><div class="fc-name">Nakato Beatrice</div><div class="fc-meta">+256 78X XXX XXX · nakato.b@gmail.com</div></div>
+            <div class="fc-status"><span class="badge amber">PENDING</span><span class="fc-submitted">Submitted 14hrs ago</span></div>
+          </div>
+          <div class="fc-body">
+            <div class="fc-field"><div class="fc-field-label">District</div><div class="fc-field-val"><strong>Wakiso</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Type</div><div class="fc-field-val"><strong>Poultry</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Farm Size</div><div class="fc-field-val"><strong>2 acres</strong></div></div>
+            <div class="fc-field"><div class="fc-field-label">Plan</div><div class="fc-field-val"><strong>Standard</strong></div></div>
+          </div>
+          <div class="fc-docs">
+            <div class="doc-chip">📄 National ID</div>
+            <div class="doc-chip">📋 Land Title</div>
+            <div class="doc-chip">🐓 Poultry Permit</div>
+          </div>
+          <div class="fc-actions">
+            <button class="act-btn approve">✓ Approve</button>
+            <button class="act-btn reject">✗ Reject</button>
+            <button class="act-btn review">⚠ Request Info</button>
+            <button class="act-btn contact">📞 Contact</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- DETAIL PANEL -->
+      <div class="detail-panel">
+        <div class="dp-header">
+          <div class="dp-title">// REVIEWING FARMER</div>
+          <div class="dp-subtitle">Rugaba Kenneth · Mbarara Dairy Farm</div>
+        </div>
+
+        <div class="dp-section">
+          <div class="dp-section-title">Farm Details</div>
+          <div class="dp-field"><span class="dp-field-key">Full Name</span><span class="dp-field-val">Rugaba Kenneth</span></div>
+          <div class="dp-field"><span class="dp-field-key">Phone</span><span class="dp-field-val" style="font-family:var(--mono);font-size:12px;">+256 77X XXX XXX</span></div>
+          <div class="dp-field"><span class="dp-field-key">District</span><span class="dp-field-val">Mbarara</span></div>
+          <div class="dp-field"><span class="dp-field-key">Sub-county</span><span class="dp-field-val">Rwanyamahembe</span></div>
+          <div class="dp-field"><span class="dp-field-key">Farm Size</span><span class="dp-field-val">8 acres</span></div>
+          <div class="dp-field"><span class="dp-field-key">Produce</span><span class="dp-field-val">Milk, Yoghurt, Ghee</span></div>
+          <div class="dp-field"><span class="dp-field-key">Years Farming</span><span class="dp-field-val">14 years</span></div>
+          <div class="dp-field"><span class="dp-field-key">Plan</span><span class="dp-field-val"><span class="badge blue">STANDARD</span></span></div>
+        </div>
+
+        <div class="dp-section">
+          <div class="dp-section-title">Verification Checklist</div>
+          <div class="checklist">
+            <div class="check-item"><div class="check-icon pass">✓</div><span class="check-label"><strong>National ID</strong> — uploaded & valid</span></div>
+            <div class="check-item"><div class="check-icon pass">✓</div><span class="check-label"><strong>Land Title</strong> — uploaded & verified</span></div>
+            <div class="check-item"><div class="check-icon pass">✓</div><span class="check-label"><strong>Dairy Permit</strong> — valid, expires Dec 2026</span></div>
+            <div class="check-item"><div class="check-icon pass">✓</div><span class="check-label"><strong>GPS Pin</strong> — set on map</span></div>
+            <div class="check-item"><div class="check-icon pass">✓</div><span class="check-label"><strong>Farm Photo</strong> — uploaded</span></div>
+            <div class="check-item"><div class="check-icon fail">✗</div><span class="check-label"><strong>UNBS Certificate</strong> — not uploaded</span></div>
+            <div class="check-item"><div class="check-icon warn">!</div><span class="check-label"><strong>Bio/Story</strong> — very short (12 words)</span></div>
+          </div>
+        </div>
+
+        <div class="dp-section">
+          <div class="dp-section-title">Admin Note</div>
+          <textarea class="note-box" placeholder="Add internal note (e.g. reason for rejection, what info was requested, follow-up date)..."></textarea>
+        </div>
+
+        <div class="dp-actions">
+          <button class="dp-btn approve">✓ APPROVE — Activate Profile</button>
+          <button class="dp-btn info">⚠ REQUEST — Ask for UNBS Certificate</button>
+          <button class="dp-btn reject">✗ REJECT — Notify Farmer</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.ftab').forEach(t=>t.addEventListener('click',function(){document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));this.classList.add('active');}));
+  document.querySelectorAll('.farmer-card').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.farmer-card').forEach(x=>x.classList.remove('selected'));this.classList.add('selected');}));
+</script>
+</body>
+</html>

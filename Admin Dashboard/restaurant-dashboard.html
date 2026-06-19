@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriConnect — Restaurant Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0F1A14; --panel: #1C2B1F;
+    --fresh: #2ECC71; --fresh-dim: #27AE60;
+    --gold: #F0C040; --text: #0F1A14;
+    --text-soft: #607060; --text-muted: #9AAA9A;
+    --border: #E2EDE4; --card: #F7FAF8; --white: #FFFFFF;
+    --red: #E74C3C; --orange: #E67E22; --blue: #3498DB;
+    --sidebar-w: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Instrument Sans', sans-serif; background: #F2F7F3; color: var(--text); display: flex; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); background: var(--night); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; }
+  .sidebar-logo { padding: 26px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--white); }
+  .logo span { color: var(--fresh); }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; }
+  .sidebar-user { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #2ECC71, #1A8A4A); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+  .sidebar-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.22); padding: 12px 10px 5px; margin-top: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: rgba(46,204,113,0.14); color: var(--fresh); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-chip { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+  .sidebar-bottom { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.07); }
+  .plan-badge { background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--gold); }
+  .plan-badge strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  .main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  .topbar { background: var(--white); height: 62px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--night); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .notif-btn { width: 38px; height: 38px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; position: relative; }
+  .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); border: 2px solid #fff; }
+  .btn-order-now { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; padding: 9px 20px; background: var(--fresh); color: var(--night); border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  .btn-order-now:hover { background: var(--fresh-dim); color: #fff; transform: translateY(-1px); }
+
+  .page-content { padding: 28px 32px 60px; }
+
+  /* WELCOME STRIP */
+  .welcome-strip {
+    background: var(--night);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex; align-items: center; gap: 24px;
+    margin-bottom: 24px;
+    position: relative; overflow: hidden;
+    animation: riseIn 0.4s ease;
+  }
+
+  .welcome-strip::after { content: ''; position: absolute; right: -60px; top: -60px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, rgba(46,204,113,0.12), transparent 70%); }
+
+  @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .ws-icon { font-size: 40px; flex-shrink: 0; }
+  .ws-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .ws-sub { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .ws-actions { margin-left: auto; display: flex; gap: 10px; position: relative; z-index: 2; }
+  .ws-btn { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 18px; background: var(--fresh); color: var(--night); border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .ws-btn:hover { background: var(--fresh-dim); color: #fff; }
+  .ws-btn-ghost { background: transparent; color: rgba(255,255,255,0.6); border: 1.5px solid rgba(255,255,255,0.15); }
+  .ws-btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: #fff; background: transparent; }
+
+  /* STATS GRID */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+
+  .stat-card { background: var(--white); border-radius: 14px; border: 1px solid var(--border); padding: 20px 22px; position: relative; overflow: hidden; animation: riseIn 0.4s ease both; }
+  .stat-card:nth-child(2) { animation-delay: 0.06s; }
+  .stat-card:nth-child(3) { animation-delay: 0.12s; }
+  .stat-card:nth-child(4) { animation-delay: 0.18s; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.g::before { background: var(--fresh); }
+  .stat-card.b::before { background: var(--blue); }
+  .stat-card.o::before { background: var(--orange); }
+  .stat-card.n::before { background: var(--night); }
+  .stat-icon { font-size: 22px; margin-bottom: 12px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 5px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; color: var(--night); margin-bottom: 5px; }
+  .stat-change { font-size: 12px; }
+  .stat-change.up { color: var(--fresh-dim); }
+  .stat-change.neutral { color: var(--text-muted); }
+
+  /* TWO-COL LAYOUT */
+  .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-bottom: 20px; }
+
+  /* BOXES */
+  .box { background: var(--white); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; animation: riseIn 0.35s ease both; }
+  .box:nth-child(2) { animation-delay: 0.08s; }
+  .box-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .box-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--night); }
+  .box-link { font-size: 13px; color: var(--fresh-dim); cursor: pointer; font-weight: 500; }
+  .box-body { padding: 0; }
+
+  /* ORDERS TABLE */
+  .order-row { display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-bottom: 1px solid #F0F4F0; transition: background 0.15s; cursor: pointer; }
+  .order-row:last-child { border-bottom: none; }
+  .order-row:hover { background: var(--card); }
+  .order-icon { font-size: 26px; flex-shrink: 0; }
+  .order-info { flex: 1; min-width: 0; }
+  .order-title { font-size: 14px; font-weight: 600; color: var(--night); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .order-meta { font-size: 12px; color: var(--text-muted); }
+  .order-amount { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--night); white-space: nowrap; margin-right: 10px; }
+
+  .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-pending { background: rgba(230,126,34,0.12); color: var(--orange); }
+  .badge-confirmed { background: rgba(52,152,219,0.12); color: var(--blue); }
+  .badge-delivered { background: rgba(46,204,113,0.12); color: var(--fresh-dim); }
+  .badge-new { background: rgba(15,26,20,0.08); color: var(--night); }
+
+  /* SAVED FARMERS */
+  .saved-row { display: flex; align-items: center; gap: 12px; padding: 12px 22px; border-bottom: 1px solid #F0F4F0; transition: background 0.15s; cursor: pointer; }
+  .saved-row:last-child { border-bottom: none; }
+  .saved-row:hover { background: var(--card); }
+  .saved-avatar { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .saved-name { font-size: 14px; font-weight: 600; color: var(--night); }
+  .saved-produce { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .saved-rating { margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-soft); }
+  .saved-stars { color: var(--gold); font-size: 12px; }
+  .order-again-btn { font-family: 'Instrument Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 6px 12px; background: transparent; color: var(--fresh-dim); border: 1.5px solid rgba(46,204,113,0.3); border-radius: 6px; cursor: pointer; margin-left: 10px; transition: all 0.2s; white-space: nowrap; }
+  .order-again-btn:hover { background: rgba(46,204,113,0.08); border-color: var(--fresh); }
+
+  /* QUICK ACTIONS */
+  .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 22px; }
+  .qa-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
+  .qa-card:hover { border-color: var(--fresh); transform: translateY(-1px); background: rgba(46,204,113,0.04); }
+  .qa-icon { font-size: 22px; margin-bottom: 8px; }
+  .qa-label { font-size: 13px; font-weight: 600; color: var(--night); margin-bottom: 2px; }
+  .qa-sub { font-size: 11px; color: var(--text-muted); }
+
+  /* SPEND CHART (simple bars) */
+  .spend-chart { padding: 20px 22px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-bottom: 8px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 4px; }
+  .bar.green { background: var(--fresh); }
+  .bar.dim { background: #D8EDD8; }
+  .bar-label { font-size: 10px; color: var(--text-muted); text-align: center; }
+  .chart-legend { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .chart-total { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--night); margin-bottom: 4px; }
+  .chart-total-label { font-size: 12px; color: var(--text-muted); }
+
+  /* UPCOMING DELIVERIES */
+  .delivery-row { display: flex; align-items: center; gap: 14px; padding: 13px 22px; border-bottom: 1px solid #F0F4F0; }
+  .delivery-row:last-child { border-bottom: none; }
+  .del-date { width: 42px; height: 42px; border-radius: 10px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--border); }
+  .del-month { font-size: 9px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600; }
+  .del-day { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--night); line-height: 1; }
+  .del-info { flex: 1; }
+  .del-title { font-size: 14px; font-weight: 600; color: var(--night); margin-bottom: 2px; }
+  .del-meta { font-size: 12px; color: var(--text-muted); }
+  .del-amount { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--night); }
+
+  @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .two-col { grid-template-columns: 1fr; } }
+  @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-wrap { margin-left: 0; } .page-content { padding: 16px; } .topbar { padding: 0 16px; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo">Agri<span>Connect</span></div><div class="logo-sub">Restaurant Portal</div></div>
+  <div class="sidebar-user"><div class="user-avatar">KK</div><div><div class="user-name">Kati Kati Restaurant</div><div class="user-role">Procurement Manager</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Procurement</div>
+    <a class="nav-item active"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item"><span class="nav-icon">🛒</span> Browse Marketplace</a>
+    <a class="nav-item"><span class="nav-icon">❤️</span> Saved Farmers</a>
+    <a class="nav-item"><span class="nav-icon">📦</span> My Orders <span class="nav-chip">2</span></a>
+    <a class="nav-item"><span class="nav-icon">🔄</span> Recurring Orders</a>
+    <div class="nav-group-label">Finance</div>
+    <a class="nav-item"><span class="nav-icon">💳</span> Payments & Escrow</a>
+    <a class="nav-item"><span class="nav-icon">📊</span> Spend Analytics</a>
+    <div class="nav-group-label">Account</div>
+    <a class="nav-item"><span class="nav-icon">🍽️</span> Restaurant Profile</a>
+    <a class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="plan-badge"><strong>⭐ Premium Plan</strong>Priority matching · Unlimited orders</div></div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <div class="topbar">
+    <div class="topbar-title">Good morning, Kati Kati 👋</div>
+    <div class="topbar-right">
+      <div class="topbar-title" style="font-size:13px;font-weight:400;color:var(--text-muted);">Wednesday, 1 April 2026</div>
+      <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+      <button class="btn-order-now">+ New Order</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- WELCOME -->
+    <div class="welcome-strip">
+      <div class="ws-icon">🥬</div>
+      <div>
+        <div class="ws-title">Pineapple season is now — Kayunga harvest underway</div>
+        <div class="ws-sub">14 verified farms have fresh stock. Emmanuel Ssekandi (your saved farmer) has 320kg ready.</div>
+      </div>
+      <div class="ws-actions">
+        <button class="ws-btn">Order from Emmanuel →</button>
+        <button class="ws-btn ws-btn-ghost">Browse all seasonal</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card g">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">This Month's Spend</div>
+        <div class="stat-val">UGX 1.24M</div>
+        <div class="stat-change up">↓ 12% vs last month (savings)</div>
+      </div>
+      <div class="stat-card b">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">Active Orders</div>
+        <div class="stat-val">2</div>
+        <div class="stat-change neutral">Deliveries due this week</div>
+      </div>
+      <div class="stat-card o">
+        <div class="stat-icon">👨‍🌾</div>
+        <div class="stat-label">Saved Farmers</div>
+        <div class="stat-val">6</div>
+        <div class="stat-change neutral">Across 4 produce categories</div>
+      </div>
+      <div class="stat-card n">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-label">Avg. Farmer Rating</div>
+        <div class="stat-val">4.8</div>
+        <div class="stat-change up">Your saved farmers</div>
+      </div>
+    </div>
+
+    <!-- TWO COL -->
+    <div class="two-col">
+
+      <!-- ORDERS -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Recent Orders</div><a class="box-link">View all</a></div>
+        <div class="box-body">
+          <div class="order-row">
+            <div class="order-icon">🍍</div>
+            <div class="order-info">
+              <div class="order-title">40kg Pineapples · Emmanuel Ssekandi</div>
+              <div class="order-meta">Delivery: Friday 4 Apr · Kayunga → Lugogo Mall</div>
+            </div>
+            <div class="order-amount">UGX 221K</div>
+            <div class="badge badge-confirmed">Confirmed</div>
+          </div>
+          <div class="order-row">
+            <div class="order-icon">🥬</div>
+            <div class="order-info">
+              <div class="order-title">20kg Kale · Akello Nancy</div>
+              <div class="order-meta">Delivery: Thursday 3 Apr · Wakiso → Lugogo</div>
+            </div>
+            <div class="order-amount">UGX 65K</div>
+            <div class="badge badge-pending">Out for delivery</div>
+          </div>
+          <div class="order-row">
+            <div class="order-icon">🥭</div>
+            <div class="order-info">
+              <div class="order-title">25kg Mangoes · Emmanuel Ssekandi</div>
+              <div class="order-meta">Delivered: 28 Mar · Confirmed ✓</div>
+            </div>
+            <div class="order-amount">UGX 175K</div>
+            <div class="badge badge-delivered">Delivered ✓</div>
+          </div>
+          <div class="order-row">
+            <div class="order-icon">🐓</div>
+            <div class="order-info">
+              <div class="order-title">10 dressed chickens · Apio Christine</div>
+              <div class="order-meta">Delivered: 25 Mar · Confirmed ✓</div>
+            </div>
+            <div class="order-amount">UGX 180K</div>
+            <div class="badge badge-delivered">Delivered ✓</div>
+          </div>
+          <div class="order-row">
+            <div class="order-icon">🥛</div>
+            <div class="order-info">
+              <div class="order-title">100L Fresh Milk · Byamukama Moses</div>
+              <div class="order-meta">Delivered: 20 Mar · Confirmed ✓</div>
+            </div>
+            <div class="order-amount">UGX 150K</div>
+            <div class="badge badge-delivered">Delivered ✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- QUICK ACTIONS -->
+        <div class="box">
+          <div class="box-header"><div class="box-title">Quick Actions</div></div>
+          <div class="qa-grid">
+            <div class="qa-card">
+              <div class="qa-icon">🛒</div>
+              <div class="qa-label">Browse Marketplace</div>
+              <div class="qa-sub">Find new farmers</div>
+            </div>
+            <div class="qa-card">
+              <div class="qa-icon">🔄</div>
+              <div class="qa-label">Repeat Last Order</div>
+              <div class="qa-sub">Pineapples from Ssekandi</div>
+            </div>
+            <div class="qa-card">
+              <div class="qa-icon">📅</div>
+              <div class="qa-label">Schedule Recurring</div>
+              <div class="qa-sub">Weekly auto-orders</div>
+            </div>
+            <div class="qa-card">
+              <div class="qa-icon">💳</div>
+              <div class="qa-label">Escrow Status</div>
+              <div class="qa-sub">UGX 286K held</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPEND CHART -->
+        <div class="box">
+          <div class="box-header"><div class="box-title">Monthly Spend</div><a class="box-link">Full report</a></div>
+          <div class="spend-chart">
+            <div class="chart-total">UGX 1.24M</div>
+            <div class="chart-total-label">April 2026 (so far)</div>
+            <div class="chart-bars" style="margin-top:14px;">
+              <div class="bar-wrap"><div class="bar dim" style="height:35px;"></div><div class="bar-label">Nov</div></div>
+              <div class="bar-wrap"><div class="bar dim" style="height:50px;"></div><div class="bar-label">Dec</div></div>
+              <div class="bar-wrap"><div class="bar dim" style="height:42px;"></div><div class="bar-label">Jan</div></div>
+              <div class="bar-wrap"><div class="bar dim" style="height:60px;"></div><div class="bar-label">Feb</div></div>
+              <div class="bar-wrap"><div class="bar dim" style="height:72px;"></div><div class="bar-label">Mar</div></div>
+              <div class="bar-wrap"><div class="bar green" style="height:55px;"></div><div class="bar-label">Apr</div></div>
+            </div>
+            <div class="chart-legend"><span>vs middlemen avg: UGX 1.8M</span><span style="color:var(--fresh-dim);font-weight:600;">Saving ~31% ↓</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TWO BOXES: SAVED FARMERS + UPCOMING DELIVERIES -->
+    <div class="two-col">
+
+      <!-- SAVED FARMERS -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Saved Farmers</div><a class="box-link">Browse more</a></div>
+        <div class="box-body">
+          <div class="saved-row">
+            <div class="saved-avatar" style="background:linear-gradient(135deg,#2ECC71,#1A6B38);">ES</div>
+            <div>
+              <div class="saved-name">Emmanuel Ssekandi</div>
+              <div class="saved-produce">🍍 Pineapples · 🥭 Mangoes · 🍋 Passion Fruit</div>
+            </div>
+            <div class="saved-rating"><span class="saved-stars">★</span>4.9</div>
+            <button class="order-again-btn">Order again</button>
+          </div>
+          <div class="saved-row">
+            <div class="saved-avatar" style="background:linear-gradient(135deg,#E67E22,#8B4513);">AN</div>
+            <div>
+              <div class="saved-name">Akello Nancy</div>
+              <div class="saved-produce">🥬 Kale · 🍅 Tomatoes · 🧅 Onions</div>
+            </div>
+            <div class="saved-rating"><span class="saved-stars">★</span>4.8</div>
+            <button class="order-again-btn">Order again</button>
+          </div>
+          <div class="saved-row">
+            <div class="saved-avatar" style="background:linear-gradient(135deg,#27AE60,#0A4A20);">AC</div>
+            <div>
+              <div class="saved-name">Apio Christine</div>
+              <div class="saved-produce">🐓 Chicken · 🥚 Eggs</div>
+            </div>
+            <div class="saved-rating"><span class="saved-stars">★</span>4.9</div>
+            <button class="order-again-btn">Order again</button>
+          </div>
+          <div class="saved-row">
+            <div class="saved-avatar" style="background:linear-gradient(135deg,#8E44AD,#4A235A);">BM</div>
+            <div>
+              <div class="saved-name">Byamukama Moses</div>
+              <div class="saved-produce">🥛 Milk · 🧈 Ghee · 🍶 Yoghurt</div>
+            </div>
+            <div class="saved-rating"><span class="saved-stars">★</span>4.6</div>
+            <button class="order-again-btn">Order again</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPCOMING DELIVERIES -->
+      <div class="box">
+        <div class="box-header"><div class="box-title">Upcoming Deliveries</div><a class="box-link">View calendar</a></div>
+        <div class="box-body">
+          <div class="delivery-row">
+            <div class="del-date"><div class="del-month">Apr</div><div class="del-day">3</div></div>
+            <div class="del-info">
+              <div class="del-title">20kg Kale · Akello Nancy</div>
+              <div class="del-meta">Morning delivery · Wakiso → Lugogo</div>
+            </div>
+            <div class="del-amount">UGX 65K</div>
+          </div>
+          <div class="delivery-row">
+            <div class="del-date"><div class="del-month">Apr</div><div class="del-day">4</div></div>
+            <div class="del-info">
+              <div class="del-title">40kg Pineapples · Emmanuel Ssekandi</div>
+              <div class="del-meta">Morning delivery · Kayunga → Lugogo</div>
+            </div>
+            <div class="del-amount">UGX 221K</div>
+          </div>
+          <div class="delivery-row">
+            <div class="del-date" style="background:rgba(46,204,113,0.08);border-color:rgba(46,204,113,0.2);"><div class="del-month">Apr</div><div class="del-day" style="color:var(--fresh-dim);">8</div></div>
+            <div class="del-info">
+              <div class="del-title">🔄 Recurring — Weekly Kale order</div>
+              <div class="del-meta">Auto-order · Akello Nancy</div>
+            </div>
+            <div class="del-amount">UGX 65K</div>
+          </div>
+          <div class="delivery-row">
+            <div class="del-date"><div class="del-month">Apr</div><div class="del-day">14</div></div>
+            <div class="del-info">
+              <div class="del-title">Mangoes harvest ready — pre-order?</div>
+              <div class="del-meta">Emmanuel Ssekandi · Est. 150kg</div>
+            </div>
+            <div class="del-amount" style="color:var(--fresh-dim);cursor:pointer;">Pre-order →</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
